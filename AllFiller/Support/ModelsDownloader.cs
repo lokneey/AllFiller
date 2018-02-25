@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InternetUser.Support
+namespace AllFiller.Support
 {
     class ModelsDownloader
     {
@@ -16,22 +16,23 @@ namespace InternetUser.Support
 
         public ModelsDownloader() { }
 
-        public ObservableCollection<string>  ModelDownloader(HtmlNode[] Model)
+        public ObservableCollection<string>  ModelDownloader(HtmlNode[] Model, System.Windows.Controls.ListBox List)
         {
             for (int modelIndexer = 0; modelIndexer < Model.Length; modelIndexer++)
             {
                 try
                 {
                     modelMaker = Model[modelIndexer].OuterHtml;
-                    indexer = modelMaker.IndexOf("title", 2);
-                    modelMaker = modelMaker.Substring(indexer + 7);
+                    indexer = modelMaker.IndexOf("</option>");
+                    modelMaker = modelMaker.Remove(indexer, modelMaker.Length - indexer);
+                    indexer = modelMaker.IndexOf(">");
+                    modelMaker = modelMaker.Remove(0, indexer+1);
+                    modelMaker = modelMaker.Replace("</option>", "");
+                    modelMaker = modelMaker.Replace("<option value=", "");
                     modelMaker = modelMaker.Replace("\"", "");
-                    modelMaker = modelMaker.Replace(" > ", "");
-                    modelMaker = modelMaker.Replace(" >", "");
-                    modelMaker = modelMaker.Replace("> ", "");
-                    modelMaker = modelMaker.Replace(">", "");
                 }
                 catch { }
+                List.Items.Add(modelMaker);
                 modelParts.Add(modelMaker);
             }
 

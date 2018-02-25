@@ -11,7 +11,7 @@ namespace AllFiller.Support
     {
         public string photosDoc;
         int indexered;
-        public PhotoDown(string title, HtmlNode[] photo, System.Windows.Controls.ListBox List)
+        public PhotoDown(string title, HtmlNode[] photo)
         {
 
             string path = AppDomain.CurrentDomain.BaseDirectory;    //Dopisz kod zamieniający istniejący plik na nowy i zrób funkcję zapisującą w oddzielnym pliku

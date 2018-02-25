@@ -4,6 +4,7 @@ using AllFiller.pl.allegro.webapi;
 using HtmlAgilityPack;
 using System.Linq;
 using AllFiller.Support;
+using System.Collections.ObjectModel;
 
 namespace AllFiller
 {
@@ -46,7 +47,8 @@ namespace AllFiller
         string currentSKU;
         string currentDescription;
         int spaceSearcher = 49;
-        
+        public ObservableCollection<string> currrentModel = new ObservableCollection<string>();
+        //string[] currentModels;
 
 
         public MainWindow()
@@ -136,6 +138,7 @@ namespace AllFiller
             HtmlWeb web = new HtmlWeb();
             HtmlDocument document = web.Load(currentURL);
             CodeArtist changer = new CodeArtist();
+            ModelsDownloader currentModels = new ModelsDownloader();
             /*
             PolishSigns sign = new PolishSigns();       //Allegro przyjmuje polskie znaki
             ModelsDownloader currentModels = new ModelsDownloader();
@@ -180,15 +183,22 @@ namespace AllFiller
 
             //Zdjęcia
             HtmlNode[] photo = document.DocumentNode.SelectNodes(".//*[contains(@class,'woocommerce-product-gallery__image')]").ToArray();
-            PhotoDown down = new PhotoDown(currentOrginalName, photo, Shower);
+            PhotoDown down = new PhotoDown(currentOrginalName, photo);
             
             //SKU - bez wariantów
             HtmlNode SKU = document.DocumentNode.SelectNodes(".//*[contains(@class,'sku_wrapper')]").First();
             currentSKU = changer.CodeArtists(SKU.InnerText, "SKU");
             SKUTB.Text = currentSKU;
 
-            //Model
-
+            //Model - odczyt zawsze zaczynać od 1 nie 0
+            try
+            {
+                HtmlNode[] Model = document.DocumentNode.SelectNodes("//option").ToArray();
+                currrentModel = currentModels.ModelDownloader(Model, Shower);
+                Shower.Items.Add(currrentModel);
+            }
+            catch
+            { }
 
             escape:
             URLTB.Text = "";

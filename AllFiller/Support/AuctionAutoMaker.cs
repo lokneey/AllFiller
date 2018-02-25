@@ -42,7 +42,7 @@ namespace InternetUser.Support
             HtmlDocument document = web.Load(url);
             //CodeArtist changer = new CodeArtist();
             PolishSigns sign = new PolishSigns();
-            ModelsDownloader currentModels = new ModelsDownloader();
+            //ModelsDownloader currentModels = new ModelsDownloader();
 
 
             //Tytuł
@@ -84,7 +84,7 @@ namespace InternetUser.Support
             //Model
 
             HtmlNode[] Model = document.DocumentNode.SelectNodes("//option").ToArray();
-            modelParts = currentModels.ModelDownloader(Model);
+           // modelParts = currentModels.ModelDownloader(Model);
             Roboczy.ItemsSource = modelParts;
 
 
