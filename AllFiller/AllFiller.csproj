@@ -62,15 +62,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Support\AuctionAutoMaker.cs" />
-    <Compile Include="Support\AuctionContentSaver.cs" />
     <Compile Include="Support\CodeArtist.cs" />
-    <Compile Include="Support\GumAuctionFiller.cs" />
-    <Compile Include="Support\LogIn.cs" />
-    <Compile Include="Support\LogInReader.cs" />
     <Compile Include="Support\ModelsDownloader.cs" />
     <Compile Include="Support\PhotoDown.cs" />
-    <Compile Include="Support\PolishSigns.cs" />
     <Compile Include="Web References\pl.allegro.webapi\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -62,7 +62,7 @@ namespace AllFiller
         public long GetLocalVersionKey() //returns localVersion key of Api and stores it
         {
             var info = service.doQuerySysStatus(1, 1, apiKey, out version);//Country code PL=1 (second parameter)
-            Shower.Items.Add(version);
+            Shower.Items.Add("Kod wersji: "+version);
             return version;
         }
 
@@ -159,7 +159,7 @@ namespace AllFiller
             currentChangedName = changer.CodeArtists(secondName.InnerHtml, "node");
             NameOfProdTB.Text += currentChangedName;
 
-            if (NameOfProdTB.Text.Length > 50)
+            if (NameOfProdTB.Text.Length > 50)      //Poprawić, żeby były również modele
             {
                 spaceSearcher = 49;
                 NameOfProdTB.Text = NameOfProdTB.Text.Remove(50, NameOfProdTB.Text.Length-50);
