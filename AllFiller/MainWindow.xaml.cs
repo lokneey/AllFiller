@@ -50,6 +50,10 @@ namespace AllFiller
         public ObservableCollection<string> currrentModel = new ObservableCollection<string>();
         //string[] currentModels;
 
+        //Wystawianie
+        string verstr;
+        long verkey;
+
 
         public MainWindow()
         {
@@ -66,13 +70,7 @@ namespace AllFiller
             return version;
         }
 
-        /*
-        public string DoLogin() //returns sessionhandler string and stores it in private field
-        {
-            sessionHandler = service.doLogin(login, pass, 1, apiKey, version, out _userId, out _serverTime);//Country code PL=1 (third parameter)
-            return sessionHandler;
-        }
-        */
+        
         private void LogBut_Click(object sender, RoutedEventArgs e)
         {
             long offset = 0;
@@ -202,6 +200,31 @@ namespace AllFiller
 
             escape:
             URLTB.Text = "";
+        }
+
+        private void Continue_Click(object sender, RoutedEventArgs e)
+        {
+            //long offset = 0;
+            //long serverTime = 0;
+            
+            try
+            {
+                CatInfoType[] categories = service.doGetCatsData(1, 0x0, apiKey, true, out verkey,  out verstr);
+
+                for(int i =0;i<categories.Length;i++)
+                {
+                    Shower.Items.Add(categories[i].catname + ": " + categories[i].catid);
+                }
+            }
+            catch
+            {
+                Shower.Items.Add("Wystawianie oferty nie powiodło");
+                MessageBoxResult wrongResult = MessageBox.Show("Błąd przy wystawianiu oferty!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (wrongResult == MessageBoxResult.OK)
+                {
+                    Application.Current.Shutdown();
+                }
+            }
         }
     }
 }

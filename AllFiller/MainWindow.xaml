@@ -19,7 +19,7 @@
         <Button x:Name="StartAuction" Content="Start" HorizontalAlignment="Left" Margin="680,85,0,0" VerticalAlignment="Top" Width="137" Click="StartAuction_Click" Height="30
                 "/>
         <TextBlock x:Name="ProductDescriptionTextBlock" HorizontalAlignment="Left" Margin="64,214,0,0" TextWrapping="WrapWithOverflow"  Text="" VerticalAlignment="Top" Height="500" Width="550"/>
-        <Button x:Name="Continue" Content="Continue" HorizontalAlignment="Left" Margin="680,120,0,0" VerticalAlignment="Top" Width="137" Height="30"/>
+        <Button x:Name="Continue" Content="Continue" HorizontalAlignment="Left" Margin="680,120,0,0" VerticalAlignment="Top" Width="137" Height="30" Click="Continue_Click"/>
         <TextBox x:Name="AmountTB" HorizontalAlignment="Left" Height="23" Margin="154,108,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
         <Label Content="Ilosc" HorizontalAlignment="Left" Margin="64,105,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="URLTB" HorizontalAlignment="Left" Height="23" Margin="64,10,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="770"/>
