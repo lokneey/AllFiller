@@ -5,6 +5,7 @@ using HtmlAgilityPack;
 using System.Linq;
 using AllFiller.Support;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace AllFiller
 {
@@ -53,6 +54,14 @@ namespace AllFiller
         //Wystawianie
         string verstr;
         long verkey;
+        FieldsValue[] formFiller;
+        ItemTemplateCreateStruct itemStruct;
+        VariantStruct[] variants;
+        TagNameStruct[] auctionTags;
+        AfterSalesServiceConditionsStruct afterSale;
+        string addicionalServicesGroup;
+        string itemCost;
+        int itemPromStatus;
 
 
         public MainWindow()
@@ -65,8 +74,17 @@ namespace AllFiller
 
         public long GetLocalVersionKey() //returns localVersion key of Api and stores it
         {
-            var info = service.doQuerySysStatus(1, 1, apiKey, out version);//Country code PL=1 (second parameter)
-            Shower.Items.Add("Kod wersji: "+version);
+            try
+            {
+                var info = service.doQuerySysStatus(1, 1, apiKey, out version);//Country code PL=1 (second parameter)
+                Shower.Items.Add("Kod wersji: " + version);
+                
+            }
+            catch
+            {
+                MessageBoxResult wrongResult = MessageBox.Show("Zgubiłem klucz wersji. Zrestartuj mnie!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            }
             return version;
         }
 
@@ -210,11 +228,24 @@ namespace AllFiller
             try
             {
                 CatInfoType[] categories = service.doGetCatsData(1, 0x0, apiKey, true, out verkey,  out verstr);
+                //Automatyka przemysłowa: 121338
+                //Zgrzewarki 252416
+                //StreamWriter catSave = new StreamWriter("C:/Users/Lokney/Desktop/catSave.txt");
+                SellFormFieldsForCategoryStruct auctionForm = service.doGetSellFormFieldsForCategory(apiKey, 1, 252416);
+                //StreamWriter auctionFormSave = new StreamWriter("C:/Users/Lokney/Desktop/auctionFormSave.txt");
+                formFiller[0].fid = 1;
 
-                for(int i =0;i<categories.Length;i++)
+                
+                service.doNewAuctionExt(sessionHandler, formFiller, 1, 1, itemStruct, variants, auctionTags, afterSale, 
+                    addicionalServicesGroup, out itemCost, out itemPromStatus);
+
+                for (int i =0;i<200;i++)
                 {
-                    Shower.Items.Add(categories[i].catname + ": " + categories[i].catid);
+                    //Shower.Items.Add(categories[i].catname + ": " + categories[i].catid);
+                   
+
                 }
+               
             }
             catch
             {

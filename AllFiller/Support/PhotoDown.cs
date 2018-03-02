@@ -2,8 +2,7 @@
 using System;
 
 using System.IO;
-
-
+using System.Windows;
 
 namespace AllFiller.Support
 {
@@ -50,8 +49,21 @@ namespace AllFiller.Support
                 path = path + i;
                 using (var client = new System.Net.WebClient())
                 {
-                    client.DownloadFile(photosDoc, path + ".jpg");
+                    try
+                    {
+                        client.DownloadFile(photosDoc, path + ".jpg");
+                    }
+                    catch
+                    {
+                        MessageBoxResult wrongResult = MessageBox.Show("Błąd przy pobieraniu zdjęć!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        if (wrongResult == MessageBoxResult.OK)
+                        {
+                            Application.Current.Shutdown();
+                        }
+                    }
                 }
+
+
                 
             }
         }
