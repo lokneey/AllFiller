@@ -16,6 +16,7 @@ namespace AllFiller
     {
         //Zrób trzy tryby, full auto, semi auto (domyślnie), ręczny
         //Jeżeli brak ilosci w magazynie lub SKU(lepsze) to pobiera dane z jakiegoś dokumentu
+        //Muszisz wybierać typ przesyłki: list polecony i priorytetowy razem, kurier za pobraniem i opłata z góry razem, paleta, opłata z góry i pobranie razem, dopisz jeszcze opcję inne gdzie możesz dopisać wpłasne opcje dla kuriera
 
         AllegroWebApiService service;   // globalny obiekt AllegroWebApiService
         string sessionHandler;
@@ -222,10 +223,20 @@ namespace AllFiller
 
         private void Continue_Click(object sender, RoutedEventArgs e)
         {
-           
 
-            //long offset = 0;
-            //long serverTime = 0;
+
+
+            /*
+            if (Kurier.IsChecked == true) { }
+            else if (Paleta.IsChecked == true) { }
+            else if (List.IsChecked == true) { }
+            else if (TylkoOsobisty.IsChecked == true) { }   //Nie widzę tej opcji
+            else if (InnaDostawa.IsChecked == true) { }
+            else
+            {
+                MessageBoxResult wrongResult = MessageBox.Show("Musisz zaznaczyć opcję wysyłki!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }*/
             
            // try
             //{
@@ -234,12 +245,12 @@ namespace AllFiller
                 //Zgrzewarki 252416
                 //StreamWriter catSave = new StreamWriter("C:/Users/Lokney/Desktop/catSave.txt");
                 SellFormFieldsForCategoryStruct auctionForm = service.doGetSellFormFieldsForCategory(apiKey, 1, 252416);
-                StreamWriter auctionFormSave = new StreamWriter("C:/Users/Lokney/Desktop/auctionFormSaveHuge.txt");
+                //StreamWriter auctionFormSave = new StreamWriter("C:/Users/Lokney/Desktop/auctionFormSave.txt");
             
             formFiller[0] = new FieldsValue();
             formFiller[0].fid = 0;
 
-            /*
+            
             formFiller[22164] = new FieldsValue();      //Waga z opakowaniem
             formFiller[22164].fid = 22164;
             if (formFiller[22164].fid == 22164)
@@ -247,7 +258,7 @@ namespace AllFiller
                 formFiller[22164].fvaluefloat = 20;
 
             }
-            */
+            
             formFiller[32611]= new FieldsValue();       //Stan
             formFiller[32611].fid = 32611;
             if(formFiller[32611].fid == 32611)
@@ -256,7 +267,7 @@ namespace AllFiller
 
             }
           
-            for (UInt32 i = 1; i < 350; i++)  //Sprawdź czy ten length ma sens
+            for (UInt32 i = 1; i < 350; i++)  
             {
                 formFiller[i] = new FieldsValue();
                 formFiller[i].fid = (int)i;
@@ -368,15 +379,43 @@ namespace AllFiller
                     case 40:    //Przesyłka pobraniowa / Paczka48 pobranie (pierwsza sztuka)
                         break;
                     case 41:    //List polecony ekonomiczny (pierwsza sztuka)
+                        /*if (List.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = (float)4.20;
+                        }*/
                         break;
                     case 42:    //Przesyłka pobraniowa priorytetowa / Paczka24 pobranie (pierwsza sztuka)
                         break;
                     case 43:    //List polecony priorytetowy (pierwsza sztuka)
+                        /*if (List.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = 7;
+                        }*/
                         break;
                     case 44:    //Przesyłka kurierska (pierwsza sztuka)
+                        /*if (Kurier.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = 21;
+                        }
+                        else if (Paleta.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = 160;
+                        }
+                        else if (InnaDostawa.IsChecked == true)
+                        {
+                            
+                        }*/
                         formFiller[i].fvaluefloat = 21;
                         break;
                     case 45:    //Przesyłka kurierska pobraniowa (pierwsza sztuka)
+                        /*if (Kurier.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = 30;
+                        }
+                        else if (Paleta.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = 160;
+                        }*/
                         break;
                     case 46:    //Odbiór w punkcie po przedpłacie - PACZKA W RUCHu (pierwsza sztuka)
                         break;
@@ -467,14 +506,39 @@ namespace AllFiller
                     case 140:    //Przesyłka pobraniowa / Paczka48 pobranie (kolejna sztuka)
                         break;
                     case 141:    //List polecony ekonomiczny (kolejna sztuka)
+                        /*if (List.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = (float)4.20;
+                        }*/
                         break;
                     case 142:    //Przesyłka pobraniowa priorytetowa / Paczka24 pobranie (kolejna sztuka)
                         break;
                     case 143:    //List polecony priorytetowy (kolejna sztuka)
+                        /*if (List.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = 7;
+                        }*/
                         break;
                     case 144:    //Przesyłka kurierska (kolejna sztuka)
+                                 /*if (Kurier.IsChecked == true)
+                                   {
+                                       formFiller[i].fvaluefloat = 21;
+                                   }
+                                   else if (Paleta.IsChecked == true)
+                                   {
+                                       formFiller[i].fvaluefloat = 160;
+                                   }*/
+                        formFiller[i].fvaluefloat = 21;
                         break;
                     case 145:    //Przesyłka kurierska pobraniowa (kolejna sztuka)
+                        /*if (Kurier.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = 30;
+                        }
+                        else if (Paleta.IsChecked == true)
+                        {
+                            formFiller[i].fvaluefloat = 160;
+                        }*/
                         break;
                     case 146:    //Odbiór w punkcie po przedpłacie - PACZKA W RUCHu (kolejna sztuka)
                         break;
@@ -565,14 +629,39 @@ namespace AllFiller
                     case 240:    //Przesyłka pobraniowa / Paczka48 pobranie (ilość w paczce)
                         break;
                     case 241:    //List polecony ekonomiczny (ilość w paczce)
+                        /*if (List.IsChecked == true)
+                        {
+                            formFiller[i].fvalueint = 1;
+                        }*/
                         break;
                     case 242:    //Przesyłka pobraniowa priorytetowa / Paczka24 pobranie (ilość w paczce)
                         break;
                     case 243:    //List polecony priorytetowy (ilość w paczce)
+                        /*if (List.IsChecked == true)
+                        {
+                            formFiller[i].fvalueint = 1;
+                        }*/
                         break;
                     case 244:    //Przesyłka kurierska (ilość w paczce)
+                        /*if (Kurier.IsChecked == true)
+                        {
+                            formFiller[i].fvalueint = 1;
+                        }
+                        else if (Paleta.IsChecked == true)
+                        {
+                            formFiller[i].fvalueint = 1;
+                        }*/
+                        formFiller[i].fvalueint = 1;
                         break;
                     case 245:    //Przesyłka kurierska pobraniowa (ilość w paczce)
+                        /*if (Kurier.IsChecked == true)
+                        {
+                            formFiller[i].fvalueint = 1;
+                        }
+                        else if (Paleta.IsChecked == true)
+                        {
+                            formFiller[i].fvalueint = 1;
+                        }*/
                         break;
                     case 246:    //Odbiór w punkcie po przedpłacie - PACZKA W RUCHu (ilość w paczce)
                         break;
