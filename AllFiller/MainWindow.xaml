@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AllFiller"
         mc:Ignorable="d"
-        Title="MainWindow" Height="778" Width="879">
+        Title="MainWindow" Height="778" Width="927">
     <Grid>
         <Label Content="Nazwa aukcji" HorizontalAlignment="Left" Margin="64,43,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="DescriptionTB" HorizontalAlignment="Left" Height="23" Margin="154,170,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
@@ -13,13 +13,13 @@
         <TextBox x:Name="NameOfProdTB" HorizontalAlignment="Left" Height="23" Margin="154,46,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
         <Label Content="Opis" HorizontalAlignment="Left" Margin="64,167,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.281,0.551"/>
         <Label Content="Cena" HorizontalAlignment="Left" Margin="64,74,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="StartBut" Content="Auction Down" HorizontalAlignment="Left" Margin="680,155,0,0" VerticalAlignment="Top" Width="137" Click="StartBut_Click" Height="30"/>
-        <Button x:Name="LogBut" Content="Log In" HorizontalAlignment="Left" Margin="680,50,0,0" VerticalAlignment="Top" Width="137" Click="LogBut_Click" Height="30"/>
-        <ListBox x:Name ="Shower" HorizontalAlignment="Left" Height="176" Margin="632,483,0,0" VerticalAlignment="Top" Width="202"/>
-        <Button x:Name="StartAuction" Content="Start" HorizontalAlignment="Left" Margin="680,85,0,0" VerticalAlignment="Top" Width="137" Click="StartAuction_Click" Height="30
+        <Button x:Name="StartBut" Content="Auction Down" HorizontalAlignment="Left" Margin="680,155,0,0" VerticalAlignment="Top" Width="204" Click="StartBut_Click" Height="30"/>
+        <Button x:Name="LogBut" Content="Log In" HorizontalAlignment="Left" Margin="680,50,0,0" VerticalAlignment="Top" Width="204" Click="LogBut_Click" Height="30"/>
+        <ListBox x:Name ="Shower" HorizontalAlignment="Left" Height="176" Margin="438,562,0,0" VerticalAlignment="Top" Width="176"/>
+        <Button x:Name="StartAuction" Content="Start" HorizontalAlignment="Left" Margin="680,85,0,0" VerticalAlignment="Top" Width="204" Click="StartAuction_Click" Height="30
                 "/>
         <TextBlock x:Name="ProductDescriptionTextBlock" HorizontalAlignment="Left" Margin="64,214,0,0" TextWrapping="WrapWithOverflow"  Text="" VerticalAlignment="Top" Height="500" Width="550"/>
-        <Button x:Name="Continue" Content="Continue" HorizontalAlignment="Left" Margin="680,120,0,0" VerticalAlignment="Top" Width="137" Height="30" Click="Continue_Click"/>
+        <Button x:Name="Continue" Content="Continue" HorizontalAlignment="Left" Margin="680,120,0,0" VerticalAlignment="Top" Width="204" Height="30" Click="Continue_Click"/>
         <TextBox x:Name="AmountTB" HorizontalAlignment="Left" Height="23" Margin="154,108,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
         <Label Content="Ilosc" HorizontalAlignment="Left" Margin="64,105,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="URLTB" HorizontalAlignment="Left" Height="23" Margin="64,10,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="770"/>
@@ -34,7 +34,19 @@
         <CheckBox x:Name="TylkoOsobisty" Content="Tylko odbiór osobisty" HorizontalAlignment="Left" Margin="705,299,0,0" VerticalAlignment="Top"/>
         <CheckBox x:Name="InnaDostawa" Content="Inne" HorizontalAlignment="Left" Margin="705,319,0,0" VerticalAlignment="Top"/>
         <Label Content="Opcje dostawy:" HorizontalAlignment="Left" Margin="680,208,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.454,0.696"/>
-        <TextBox x:Name="CustomKurierZwykły" HorizontalAlignment="Left" Height="23" Margin="705,339,0,0" TextWrapping="Wrap" Text="Opłacony z góry" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="CustomKurierPobranie" HorizontalAlignment="Left" Height="23" Margin="705,367,0,0" TextWrapping="Wrap" Text="Za pobrnaiem" VerticalAlignment="Top" Width="120"/>
+        <TextBox x:Name="CustomKurierZwykły" HorizontalAlignment="Left" Height="23" Margin="705,339,0,0" TextWrapping="Wrap" Text="Opłacony z góry" VerticalAlignment="Top" Width="179"/>
+        <TextBox x:Name="CustomKurierPobranie" HorizontalAlignment="Left" Height="23" Margin="705,367,0,0" TextWrapping="Wrap" Text="Za pobrnaiem" VerticalAlignment="Top" Width="179"/>
+        <Calendar x:Name="OfferCallendar" HorizontalAlignment="Left" Margin="705,484,0,0" VerticalAlignment="Top" SelectionMode="MultipleRange" Visibility="Hidden"/>
+        <Label Content="Określ częstotliwość publikowania:" HorizontalAlignment="Left" Margin="680,395,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.454,0.696"/>
+        <ComboBox x:Name="OfferFrequency" HorizontalAlignment="Left" Margin="705,426,0,0" VerticalAlignment="Top" Width="179" Text="Wybierz" SelectedIndex="2" RenderTransformOrigin="0.482,1.219">
+            <ComboBoxItem Name="Freq1">Jednorazowo</ComboBoxItem>
+            <ComboBoxItem Name="Freq2">Co 2 tygodnie</ComboBoxItem>
+            <ComboBoxItem Name="Freq3">Co tydzień</ComboBoxItem>
+            <ComboBoxItem Name="Freq4">Co 3 dni</ComboBoxItem>
+            <ComboBoxItem Name="Freq5">Codziennie</ComboBoxItem>
+            <ComboBoxItem Name="Freq6">Custom</ComboBoxItem>
+        </ComboBox>
+        <Button x:Name="DateConfirm" Content="Potwierdź" HorizontalAlignment="Left" Margin="809,655,0,0" VerticalAlignment="Top" Width="75" Click="DateConfirm_Click" Visibility="Hidden"/>
+        <Label x:Name="DatePick" Content="Wybierz dowolne daty (z Ctrl):" HorizontalAlignment="Left" Margin="680,453,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.454,0.696" Visibility="Hidden"/>
     </Grid>
 </Window>

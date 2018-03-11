@@ -17,6 +17,7 @@ namespace AllFiller
         //Zrób trzy tryby, full auto, semi auto (domyślnie), ręczny
         //Jeżeli brak ilosci w magazynie lub SKU(lepsze) to pobiera dane z jakiegoś dokumentu
         //Muszisz wybierać typ przesyłki: list polecony i priorytetowy razem, kurier za pobraniem i opłata z góry razem, paleta, opłata z góry i pobranie razem, dopisz jeszcze opcję inne gdzie możesz dopisać wpłasne opcje dla kuriera
+        //Zrób zapisywanie do pliku wszystkich numerów aukcji i ich tytułów, które wystawisz
 
         AllegroWebApiService service;   // globalny obiekt AllegroWebApiService
         string sessionHandler;
@@ -63,6 +64,8 @@ namespace AllFiller
         string addicionalServicesGroup;
         string itemCost;
         int itemPromStatus;
+        DateTime currentDate;
+        DateTime currentTime;
 
 
         public MainWindow()
@@ -71,6 +74,9 @@ namespace AllFiller
 
             service = new AllegroWebApiService();// inicjalizacja obiektu service
             GetLocalVersionKey();
+
+            currentDate = DateTime.Now;
+
         }
 
         public long GetLocalVersionKey() //returns localVersion key of Api and stores it
@@ -111,6 +117,7 @@ namespace AllFiller
             Shower.Items.Add(sessionHandler);
             Shower.Items.Add(offset.ToString());
             Shower.Items.Add(serverTime.ToString());
+            
 
         }
 
@@ -221,8 +228,8 @@ namespace AllFiller
             URLTB.Text = "";
         }
 
-        private void Continue_Click(object sender, RoutedEventArgs e)
-        {
+        private void Continue_Click(object sender, RoutedEventArgs e)       //Zawartość tego clicka przenieś do jednej, lub kilku funkcji
+        {                                                                   //Dopisz zabezpieczenie sprawdzające czy zostały już pobrane info ze strony
 
 
 
@@ -237,6 +244,14 @@ namespace AllFiller
                 MessageBoxResult wrongResult = MessageBox.Show("Musisz zaznaczyć opcję wysyłki!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }*/
+
+            if (OfferFrequency.SelectedIndex>-1)
+            { }
+            else
+            {
+                MessageBoxResult wrongResult = MessageBox.Show("Musisz częstotliwość wystawiania!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             
            // try
             //{
@@ -274,7 +289,7 @@ namespace AllFiller
                 Shower.Items.Add(formFiller[i].fid);
             }
 
-                for (UInt32 i = 1; i < 350; i++)  //Sprawdź czy ten length ma sens
+                for (UInt32 i = 1; i < 350; i++)  
             {
 
 
@@ -747,7 +762,7 @@ namespace AllFiller
                         formFiller[i].fvalueint = 1;
                         break;
                     case 341:    //Nowy opis oferty
-
+                        formFiller[i].fvaluestring = "Mój tytuł";   //Zrób tutaj wywołanie funkcji, lub obiektu w którym tworzysz plik z opisem (na tym etapie masz już informację o ilosci zdjęć, oraz przetworzony tekst ze strony lini)
                         break;
                     case 342:    //Zdjęcie 9
                         break;
@@ -775,6 +790,10 @@ namespace AllFiller
             //afterSale.warranty = "";
             //afterSale.returnpolicy = "";
             //afterSale.impliedwarranty = "";
+
+            //Określanie częstotliwości wystawiania
+            
+            
 
 
             service.doNewAuctionExt(sessionHandler, formFiller, 1, 1, itemStruct, variants, auctionTags, afterSale, 
@@ -812,19 +831,81 @@ namespace AllFiller
                 }
                 catch { }
                 */
+                
             }
-            
-              /* 
-            }
-            catch
+
+            /* 
+          }
+          catch
+          {
+              Shower.Items.Add("Wystawianie oferty nie powiodło");
+              MessageBoxResult wrongResult = MessageBox.Show("Błąd przy wystawianiu oferty!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+              if (wrongResult == MessageBoxResult.OK)
+              {
+                  Application.Current.Shutdown();
+              }
+          }*/
+            for (UInt32 i = 0; i <= 5; i++)     //Przemyśl, czy to jest odpowiednie miejsce na wybór ilosci wystawień
             {
-                Shower.Items.Add("Wystawianie oferty nie powiodło");
-                MessageBoxResult wrongResult = MessageBox.Show("Błąd przy wystawianiu oferty!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                if (wrongResult == MessageBoxResult.OK)
+                switch (i)
                 {
-                    Application.Current.Shutdown();
+                    case 0:
+                        if (OfferFrequency.SelectedIndex == i)
+                        { }
+                        break;
+                    case 1:
+                        if (OfferFrequency.SelectedIndex == i)
+                        { }
+                        break;
+                    case 2:
+                        if (OfferFrequency.SelectedIndex == i)
+                        { }
+                        break;
+                    case 3:
+                        if (OfferFrequency.SelectedIndex == i)
+                        { }
+                        break;
+                    case 4:
+                        if (OfferFrequency.SelectedIndex == i)
+                        { }
+                        break;
+                    case 5:
+                        if (OfferFrequency.SelectedIndex == i)
+                        {
+                            CustomDates();
+                        }
+                        break;
                 }
-            }*/
+            }
+        }
+
+        public void CustomDates()
+        {
+            DatePick.Visibility = Visibility.Visible;
+            OfferCallendar.Visibility = Visibility.Visible;
+            DateConfirm.Visibility = Visibility.Visible;
+        }
+
+        private void DateConfirm_Click(object sender, RoutedEventArgs e) //Wybiera tylko daty po dniu obecnym a obecny dzień pomija - wtedy po prostu przy wystawianiu można dopisać wystawiania w dniu dzisiejszy i reselling tej samej aukcji, zmień jeszcze godziny na taką w jakiej wystawiasz
+        {
+            if (OfferFrequency.SelectedIndex == 5)
+            {
+                try
+                {
+                
+                    for (int i = 0; i <= 1000; i++)
+                    {
+                        if (DateTime.Compare(currentDate, OfferCallendar.SelectedDates[i])<=0)
+                        {
+                            Shower.Items.Add(OfferCallendar.SelectedDates[i].ToString());
+                        }
+                    }
+                }
+                catch { }
+            }
+            DatePick.Visibility = Visibility.Hidden;
+            OfferCallendar.Visibility = Visibility.Hidden;
+            DateConfirm.Visibility = Visibility.Hidden;
         }
     }
 }
