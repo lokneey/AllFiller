@@ -48,5 +48,6 @@
         </ComboBox>
         <Button x:Name="DateConfirm" Content="Potwierdź" HorizontalAlignment="Left" Margin="809,655,0,0" VerticalAlignment="Top" Width="75" Click="DateConfirm_Click" Visibility="Hidden"/>
         <Label x:Name="DatePick" Content="Wybierz dowolne daty (z Ctrl):" HorizontalAlignment="Left" Margin="680,453,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.454,0.696" Visibility="Hidden"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="680,464,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
     </Grid>
 </Window>
