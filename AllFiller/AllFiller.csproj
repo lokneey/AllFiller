@@ -362,5 +362,14 @@
       <CachedSettingsPropName>AllFiller_pl_allegro_webapi_AllegroWebApiService</CachedSettingsPropName>
     </WebReferenceUrl>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Additional\auctionFormSave.txt" />
+    <Resource Include="Additional\auctionFormSavedoGetItemFields.txt" />
+    <Resource Include="Additional\catSave.txt" />
+    <Resource Include="Additional\pola formularza łatwiej.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Additional\head.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

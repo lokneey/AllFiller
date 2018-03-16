@@ -46,12 +46,12 @@ namespace AllFiller.Support
                 //TBinfozestronyLinki.Items.Add(photosDoc);
                 */
                 
-                path = path + i;
+                
                 using (var client = new System.Net.WebClient())
                 {
                     try
                     {
-                        client.DownloadFile(photosDoc, path + ".jpg");
+                        client.DownloadFile(photosDoc, path + i + ".jpg");
                     }
                     catch
                     {

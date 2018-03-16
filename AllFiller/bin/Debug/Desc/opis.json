@@ -1,0 +1,23 @@
+﻿{
+            "sections": [{                
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_342"
+                }]
+	    }, {
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_16"
+                }, {
+                    "type": "TEXT",
+                    "content": "<p>tekstowy opis przedmiotu</p>"
+                }]
+            }, {
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_343"
+                
+                }]
+            }]
+        }
+        

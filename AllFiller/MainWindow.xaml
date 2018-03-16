@@ -8,24 +8,23 @@
         Title="MainWindow" Height="778" Width="927">
     <Grid>
         <Label Content="Nazwa aukcji" HorizontalAlignment="Left" Margin="64,43,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="DescriptionTB" HorizontalAlignment="Left" Height="23" Margin="154,170,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
-        <TextBox x:Name="PriceTB" HorizontalAlignment="Left" Height="23" Margin="154,77,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
-        <TextBox x:Name="NameOfProdTB" HorizontalAlignment="Left" Height="23" Margin="154,46,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
-        <Label Content="Opis" HorizontalAlignment="Left" Margin="64,167,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.281,0.551"/>
-        <Label Content="Cena" HorizontalAlignment="Left" Margin="64,74,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="StartBut" Content="Auction Down" HorizontalAlignment="Left" Margin="680,155,0,0" VerticalAlignment="Top" Width="204" Click="StartBut_Click" Height="30"/>
+        <TextBox x:Name="DescriptionTB" HorizontalAlignment="Left" Height="491" Margin="154,186,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
+        <TextBox x:Name="PriceTB" HorizontalAlignment="Left" Height="23" Margin="154,93,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
+        <TextBox x:Name="NameOfProdTB" HorizontalAlignment="Left" Height="23" Margin="154,46,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" TextChanged="NameOfProdTB_TextChanged" />
+        <Label Content="Opis" HorizontalAlignment="Left" Margin="64,183,0,0" VerticalAlignment="Top" RenderTransformOrigin="1.281,0.551"/>
+        <Label Content="Cena" HorizontalAlignment="Left" Margin="64,90,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="StartBut" Content="Pobierz informacje o aukcjach" HorizontalAlignment="Left" Margin="680,155,0,0" VerticalAlignment="Top" Width="204" Click="StartBut_Click" Height="30"/>
         <Button x:Name="LogBut" Content="Log In" HorizontalAlignment="Left" Margin="680,50,0,0" VerticalAlignment="Top" Width="204" Click="LogBut_Click" Height="30"/>
         <ListBox x:Name ="Shower" HorizontalAlignment="Left" Height="176" Margin="438,562,0,0" VerticalAlignment="Top" Width="176"/>
-        <Button x:Name="StartAuction" Content="Start" HorizontalAlignment="Left" Margin="680,85,0,0" VerticalAlignment="Top" Width="204" Click="StartAuction_Click" Height="30
+        <Button x:Name="StartAuction" Content="Pobierz dane produktu" HorizontalAlignment="Left" Margin="680,85,0,0" VerticalAlignment="Top" Width="204" Click="StartAuction_Click" Height="30
                 "/>
-        <TextBlock x:Name="ProductDescriptionTextBlock" HorizontalAlignment="Left" Margin="64,214,0,0" TextWrapping="WrapWithOverflow"  Text="" VerticalAlignment="Top" Height="500" Width="550"/>
-        <Button x:Name="Continue" Content="Continue" HorizontalAlignment="Left" Margin="680,120,0,0" VerticalAlignment="Top" Width="204" Height="30" Click="Continue_Click"/>
-        <TextBox x:Name="AmountTB" HorizontalAlignment="Left" Height="23" Margin="154,108,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
-        <Label Content="Ilosc" HorizontalAlignment="Left" Margin="64,105,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="Continue" Content="Wystaw aukcję" HorizontalAlignment="Left" Margin="680,120,0,0" VerticalAlignment="Top" Width="204" Height="30" Click="Continue_Click"/>
+        <TextBox x:Name="AmountTB" HorizontalAlignment="Left" Height="23" Margin="154,124,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
+        <Label Content="Ilosc" HorizontalAlignment="Left" Margin="64,121,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="URLTB" HorizontalAlignment="Left" Height="23" Margin="64,10,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="770"/>
         <Label Content="URL" HorizontalAlignment="Left" Margin="25,10,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="SKUTB" HorizontalAlignment="Left" Height="23" Margin="154,140,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
-        <Label Content="SKU" HorizontalAlignment="Left" Margin="64,136,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="SKUTB" HorizontalAlignment="Left" Height="23" Margin="154,156,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="419" />
+        <Label Content="SKU" HorizontalAlignment="Left" Margin="64,152,0,0" VerticalAlignment="Top"/>
         <Ellipse x:Name="grey" Fill="Gray" HorizontalAlignment="Left" Height="61" Margin="594,49,0,0" Stroke="Gray"  VerticalAlignment="Top" Width="61"/>
         <Ellipse x:Name="LED" Fill="#FF3DFF00" HorizontalAlignment="Left" Height="51" Margin="599,54,0,0" Stroke="Gray"  VerticalAlignment="Top" Width="51"/>
         <CheckBox x:Name="Kurier" Content="Kurier do 30 kg" HorizontalAlignment="Left" Margin="705,239,0,0" VerticalAlignment="Top"/>
@@ -49,5 +48,7 @@
         <Button x:Name="DateConfirm" Content="Potwierdź" HorizontalAlignment="Left" Margin="809,655,0,0" VerticalAlignment="Top" Width="75" Click="DateConfirm_Click" Visibility="Hidden"/>
         <Label x:Name="DatePick" Content="Wybierz dowolne daty (z Ctrl):" HorizontalAlignment="Left" Margin="680,453,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.454,0.696" Visibility="Hidden"/>
         <Button Content="Button" HorizontalAlignment="Left" Margin="680,464,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
+        <Label Content="Pozostała ilość znaków w tytule aukcji: " HorizontalAlignment="Left" Margin="154,69,0,0" VerticalAlignment="Top" FontSize="8" FontWeight="Bold" />
+        <Label x:Name="signsNumberLabel" Content="{Binding Path=labelContent}" HorizontalAlignment="Left" Margin="309,69,0,0" VerticalAlignment="Top" FontSize="8" FontWeight="Bold" />
     </Grid>
 </Window>
