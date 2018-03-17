@@ -7,6 +7,7 @@ using AllFiller.Support;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Media.Imaging;
+using System.Windows.Controls;
 
 namespace AllFiller
 {
@@ -74,11 +75,15 @@ namespace AllFiller
         UInt32 imageSelector;
         bool isThereATable = false;
         string descriptionWorker;
+        DateTime timeWorker;
+        DateTime[] dateWorker = new DateTime[1000];
 
 
         public MainWindow()
         {
             InitializeComponent();
+
+            this.Title = "AllFiller - Łukasz Granat";
 
             service = new AllegroWebApiService();// inicjalizacja obiektu service
             GetLocalVersionKey();
@@ -123,6 +128,9 @@ namespace AllFiller
                 }
             }
 
+            sessionHandlerTB.Text = sessionHandler;
+            sessionHandlerTB.Visibility = Visibility.Visible;
+            sessionIDLabel.Visibility = Visibility.Visible;
             Shower.Items.Add(sessionHandler);
             Shower.Items.Add(offset.ToString());
             Shower.Items.Add(serverTime.ToString());
@@ -256,7 +264,7 @@ namespace AllFiller
                 return;
             }*/
 
-            if (OfferFrequency.SelectedIndex>-1)
+            if (OfferFrequencyCB.SelectedIndex>-1)
             { }
             else
             {
@@ -863,6 +871,7 @@ namespace AllFiller
                 formFiller[i] = new FieldsValue();
                 formFiller[i].fid = (int)i;
                 formFiller[i].fvalueimage = photo;
+                imageSelector++;
             }
             if (File.Exists(normalPath + "Table/" + SKUTB.Text + ".png"))
             {
@@ -898,15 +907,117 @@ namespace AllFiller
             formFiller[34] = new FieldsValue();
             formFiller[34].fid = 34;
             formFiller[34].fvaluestring = "97 1140 2004 0000 3102 7532 3271";
-            formFiller[44] = new FieldsValue();                                     //Tu zaczyna się dostawa
-            formFiller[44].fid = 44;
-            formFiller[44].fvaluefloat = 21;
-            formFiller[144] = new FieldsValue();       
-            formFiller[144].fid = 144;
-            formFiller[144].fvaluefloat = 21;
-            formFiller[244] = new FieldsValue();       
-            formFiller[244].fid = 244;
-            formFiller[244].fvalueint = 1;
+            formFiller[35] = new FieldsValue();
+            formFiller[35].fid = 35;
+            formFiller[35].fvalueint = 1;
+
+            if (TylkoOsobisty.IsChecked == true)
+            {
+                Paleta.IsChecked = false;
+                Kurier.IsChecked = false;
+                List.IsChecked = false;
+                InnaDostawa.IsChecked = false;
+            }
+
+            if (Paleta.IsChecked == false)
+            {
+                if (Kurier.IsChecked == true)
+                {
+                    formFiller[44] = new FieldsValue();                   //Kurier opłacony z góry
+                    formFiller[44].fid = 44;
+                    formFiller[44].fvaluefloat = 21;
+                    formFiller[144] = new FieldsValue();
+                    formFiller[144].fid = 144;
+                    formFiller[144].fvaluefloat = 21;
+                    formFiller[244] = new FieldsValue();
+                    formFiller[244].fid = 244;
+                    formFiller[244].fvalueint = 1;
+
+                    formFiller[45] = new FieldsValue();                   //Kurier za pobraniem
+                    formFiller[45].fid = 45;
+                    formFiller[45].fvaluefloat = 30;
+                    formFiller[145] = new FieldsValue();
+                    formFiller[145].fid = 145;
+                    formFiller[145].fvaluefloat = 30;
+                    formFiller[245] = new FieldsValue();
+                    formFiller[245].fid = 245;
+                    formFiller[245].fvalueint = 1;
+                }
+            }
+
+            if (List.IsChecked == true)
+            {
+                formFiller[41] = new FieldsValue();                   //list polecony ekonomiczny
+                formFiller[41].fid = 41;
+                formFiller[41].fvaluefloat = (float)4.20;
+                formFiller[141] = new FieldsValue();
+                formFiller[141].fid = 141;
+                formFiller[141].fvaluefloat = (float)4.20;
+                formFiller[241] = new FieldsValue();
+                formFiller[241].fid = 241;
+                formFiller[241].fvalueint = 1;
+
+                formFiller[43] = new FieldsValue();                   //list polecony priorytetowy
+                formFiller[43].fid = 43;
+                formFiller[43].fvaluefloat = 7;
+                formFiller[143] = new FieldsValue();
+                formFiller[143].fid = 143;
+                formFiller[143].fvaluefloat = 7;
+                formFiller[243] = new FieldsValue();
+                formFiller[243].fid = 243;
+                formFiller[243].fvalueint = 1;
+            }
+
+            if (Kurier.IsChecked == false)
+            {
+                if (Paleta.IsChecked == true)
+                {
+                    formFiller[44] = new FieldsValue();                   //Paleta opłacona z góry
+                    formFiller[44].fid = 44;
+                    formFiller[44].fvaluefloat = 160;
+                    formFiller[144] = new FieldsValue();
+                    formFiller[144].fid = 144;
+                    formFiller[144].fvaluefloat = 160;
+                    formFiller[244] = new FieldsValue();
+                    formFiller[244].fid = 244;
+                    formFiller[244].fvalueint = 1;
+
+                    formFiller[45] = new FieldsValue();                   //Paleta za pobraniem
+                    formFiller[45].fid = 45;
+                    formFiller[45].fvaluefloat = 160;
+                    formFiller[145] = new FieldsValue();
+                    formFiller[145].fid = 145;
+                    formFiller[145].fvaluefloat = 160;
+                    formFiller[245] = new FieldsValue();
+                    formFiller[245].fid = 245;
+                    formFiller[245].fvalueint = 1;
+
+                }
+            }
+
+            if (InnaDostawa.IsChecked == true)
+            {
+                formFiller[44] = new FieldsValue();                   //Kurier opłacony z góry
+                formFiller[44].fid = 44;
+                formFiller[44].fvaluefloat = float.Parse(CustomKurierZwykłyTB.Text);
+                formFiller[144] = new FieldsValue();
+                formFiller[144].fid = 144;
+                formFiller[144].fvaluefloat = float.Parse(CustomKurierZwykłyTB.Text);
+                formFiller[244] = new FieldsValue();
+                formFiller[244].fid = 244;
+                formFiller[244].fvalueint = 1;
+
+                formFiller[45] = new FieldsValue();                   //Kurier za pobraniem
+                formFiller[45].fid = 45;
+                formFiller[45].fvaluefloat = float.Parse(CustomKurierPobranieTB.Text);
+                formFiller[145] = new FieldsValue();
+                formFiller[145].fid = 145;
+                formFiller[145].fvaluefloat = float.Parse(CustomKurierPobranieTB.Text);
+                formFiller[245] = new FieldsValue();
+                formFiller[245].fid = 245;
+                formFiller[245].fvalueint = 1;
+            }
+
             formFiller[340] = new FieldsValue();       
             formFiller[340].fid = 340;
             formFiller[340].fvalueint = 1;
@@ -914,15 +1025,14 @@ namespace AllFiller
             formFiller[341].fid = 341;
             switch (imageCounter)       //Upewnij się że na pewno jest tyle możliwości zdjęć
             {
-                case 0:
+                case 0:     //Z jakiegoś powodu może nie przepuścić zbyt długiego opisu
                     if (isThereATable == true)
                     {
                         StreamReader desc = new StreamReader(normalPath + "Desc/opis0phototable.json");
                         descriptionWorker = desc.ReadToEnd();
                         descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
                         descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        DescriptionTB.Text = descriptionWorker;
+                        formFiller[341].fvaluestring = descriptionWorker;                        
                         desc.Close();
                     }
                     else
@@ -942,8 +1052,7 @@ namespace AllFiller
                         descriptionWorker = desc.ReadToEnd();
                         descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
                         descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        DescriptionTB.Text = descriptionWorker;
+                        formFiller[341].fvaluestring = descriptionWorker;                        
                         desc.Close();
                     }
                     else
@@ -963,8 +1072,7 @@ namespace AllFiller
                         descriptionWorker = desc.ReadToEnd();
                         descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
                         descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        DescriptionTB.Text = descriptionWorker;
+                        formFiller[341].fvaluestring = descriptionWorker;                       
                         desc.Close();
                     }
                     else
@@ -984,8 +1092,7 @@ namespace AllFiller
                         descriptionWorker = desc.ReadToEnd();
                         descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
                         descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        DescriptionTB.Text = descriptionWorker;
+                        formFiller[341].fvaluestring = descriptionWorker;                        
                         desc.Close();
                     }
                     else
@@ -1005,8 +1112,7 @@ namespace AllFiller
                         descriptionWorker = desc.ReadToEnd();
                         descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
                         descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        DescriptionTB.Text = descriptionWorker;
+                        formFiller[341].fvaluestring = descriptionWorker;                        
                         desc.Close();
                     }
                     else
@@ -1026,8 +1132,7 @@ namespace AllFiller
                         descriptionWorker = desc.ReadToEnd();
                         descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
                         descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        DescriptionTB.Text = descriptionWorker;
+                        formFiller[341].fvaluestring = descriptionWorker;                        
                         desc.Close();
                     }
                     else
@@ -1047,8 +1152,7 @@ namespace AllFiller
                         descriptionWorker = desc.ReadToEnd();
                         descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
                         descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        DescriptionTB.Text = descriptionWorker;
+                        formFiller[341].fvaluestring = descriptionWorker;                        
                         desc.Close();
                     }
                     else
@@ -1068,8 +1172,7 @@ namespace AllFiller
                         descriptionWorker = desc.ReadToEnd();
                         descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
                         descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        DescriptionTB.Text = descriptionWorker;
+                        formFiller[341].fvaluestring = descriptionWorker;                        
                         desc.Close();
                     }
                     else
@@ -1082,62 +1185,10 @@ namespace AllFiller
                         desc.Close();
                     }
                     break;
-
-
-
             }
-            
             isThereATable = false;
 
-            //https://imageshack.com/a/img923/9599/hMZK3z.png
-            //List polecony ekonomiczny (pierwsza sztuka)
-            /*if (List.IsChecked == true)
-            {
-                formFiller[i].fvaluefloat = (float)4.20;
-            }
-            break;
-        case 42:    //Przesyłka pobraniowa priorytetowa / Paczka24 pobranie (pierwsza sztuka)
-            break;
-        case 43:    //List polecony priorytetowy (pierwsza sztuka)
-            /*if (List.IsChecked == true)
-            {
-                formFiller[i].fvaluefloat = 7;
-            }
-            break;
-        case 44:    //Przesyłka kurierska (pierwsza sztuka)
-                    /*if (Kurier.IsChecked == true)
-                    {
-                        formFiller[i].fvaluefloat = 21;
-                    }
-                    else if (Paleta.IsChecked == true)
-                    {
-                        formFiller[i].fvaluefloat = 160;
-                    }
-                    else if (InnaDostawa.IsChecked == true)
-                    {
-
-                    }
-
-            formFiller[i].fvaluefloat = 21;
-            break;
-        case 45:    //Przesyłka kurierska pobraniowa (pierwsza sztuka)
-            /*if (Kurier.IsChecked == true)
-            {
-                formFiller[i].fvaluefloat = 30;
-            }
-            else if (Paleta.IsChecked == true)
-            {
-                formFiller[i].fvaluefloat = 160;
-            }
-            break;
-
-   */
-
-            /*
-              
-              pictureBox1.Image = new Bitmap(absolutePath);
-              */
-
+           
             service.doNewAuctionExt(sessionHandler, formFiller, 1, 1, itemStruct, variants, auctionTags, afterSale, 
                 addicionalServicesGroup, out itemCost, out itemPromStatus);
 
@@ -1191,32 +1242,47 @@ namespace AllFiller
           }*/
             for (UInt32 i = 0; i <= 5; i++)     //Przemyśl, czy to jest odpowiednie miejsce na wybór ilosci wystawień
             {
+                timeWorker = DateTime.Now.AddMinutes(20);      // sprawdzaj, czy date worker is null
+
                 switch (i)
                 {
                     case 0:
-                        if (OfferFrequency.SelectedIndex == i)
-                        { }
+                        if (OfferFrequencyCB.SelectedIndex == i)        //Jednorazowo
+                        {
+
+                        }
                         break;
                     case 1:
-                        if (OfferFrequency.SelectedIndex == i)
-                        { }
+                        if (OfferFrequencyCB.SelectedIndex == i)        //Co dwa tygodnie
+                        {
+                            timeWorker = DateTime.Now.AddMinutes(20);
+                        }
                         break;
                     case 2:
-                        if (OfferFrequency.SelectedIndex == i)
-                        { }
+                        if (OfferFrequencyCB.SelectedIndex == i)        //Co tydzień
+                        {
+                            timeWorker = DateTime.Now.AddMinutes(20);
+                        }
                         break;
                     case 3:
-                        if (OfferFrequency.SelectedIndex == i)
-                        { }
+                        if (OfferFrequencyCB.SelectedIndex == i)        //Co 3 dni
+                        {
+                            timeWorker = DateTime.Now.AddMinutes(20);
+                        }
                         break;
                     case 4:
-                        if (OfferFrequency.SelectedIndex == i)
-                        { }
+                        if (OfferFrequencyCB.SelectedIndex == i)        //Codziennie
+                        {
+                            timeWorker = DateTime.Now.AddMinutes(20);
+                        }
                         break;
                     case 5:
-                        if (OfferFrequency.SelectedIndex == i)
+                        if (OfferFrequencyCB.SelectedIndex == i)        //Custom
                         {
                             CustomDates();
+                            if (OfferCallendar.SelectedDate != null)
+                            {
+                            }
                         }
                         break;
                 }
@@ -1232,76 +1298,44 @@ namespace AllFiller
 
         private void DateConfirm_Click(object sender, RoutedEventArgs e) //Wybiera tylko daty po dniu obecnym a obecny dzień pomija - wtedy po prostu przy wystawianiu można dopisać wystawiania w dniu dzisiejszy i reselling tej samej aukcji, zmień jeszcze godziny na taką w jakiej wystawiasz
         {
-            if (OfferFrequency.SelectedIndex == 5)
+            if (OfferFrequencyCB.SelectedIndex == 5)
             {
                 try
                 {
-                
-                    for (int i = 0; i <= 1000; i++)
+
+                    for (int i = 0; i < OfferCallendar.SelectedDates.Count; i++)
                     {
-                        if (DateTime.Compare(currentDate, OfferCallendar.SelectedDates[i])<=0)
-                        {
-                            Shower.Items.Add(OfferCallendar.SelectedDates[i].ToString());
+                        if (DateTime.Compare(currentDate.Date, OfferCallendar.SelectedDates[i].Date) <= 0)
+                        {                            
+                            if (OfferCallendar.SelectedDates[i] != null)
+                            {
+                                dateWorker[i] = new DateTime();
+                                dateWorker[i] = OfferCallendar.SelectedDates[i].Date;
+                                Shower.Items.Add(dateWorker[i].ToString());
+                            }
                         }
                     }
                 }
-                catch { }
+                catch
+                {
+                    
+                }
+
+                if (OfferCallendar.SelectedDate == null)
+                {
+                    MessageBoxResult wrongResult = MessageBox.Show("Musisz wybrać przynajmniej jedną datę!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (wrongResult == MessageBoxResult.OK)
+                    {
+                        return;
+                    }
+                }
             }
             DatePick.Visibility = Visibility.Hidden;
             OfferCallendar.Visibility = Visibility.Hidden;
             DateConfirm.Visibility = Visibility.Hidden;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            //formFiller[0] = new FieldsValue();
-            /*for (UInt32 i = 0; i < 350; i++)
-            {
-                formFiller[i] = new FieldsValue();
-                formFiller[i].fid = (int)i;
-                Shower.Items.Add(formFiller[i].fid);
-            }*/
-
-            /*AfterSalesServiceConditionsStruct afters;
-            string add;
-            FieldsValue[] auctionForm = service.doGetItemFields(sessionHandler, 7231534592, out afters, out add);
-            StreamWriter auctionFormSave = new StreamWriter("C:/Users/Lokney/Desktop/auctionFormSavedoGetItemFields.txt");
-
-            auctionFormSave.WriteLine("impliedwarranty: "+afters.impliedwarranty);
-            auctionFormSave.WriteLine("returnpolicy: "+afters.returnpolicy);
-            auctionFormSave.WriteLine("warranty: "+afters.warranty);
-            auctionFormSave.WriteLine(add);
-
-            for (int i = 0; i < 100; i++)
-            {
-              
-                
-                try
-                {
-                    auctionFormSave.WriteLine(auctionForm[i].fid);                   
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluestring);
-                    auctionFormSave.WriteLine(auctionForm[i].fvalueint);
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluefloat);
-                    auctionFormSave.WriteLine(auctionForm[i].fvalueimage);
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluedatetime);
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluedate);
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluerangeint.fvaluerangeintmax);
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluerangeint.fvaluerangeintmin);
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluerangefloat.fvaluerangefloatmax);
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluerangefloat.fvaluerangefloatmin);
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluerangedate.fvaluerangedatemax);
-                    auctionFormSave.WriteLine(auctionForm[i].fvaluerangedate.fvaluerangedatemin);
-                    
-                }
-                catch { }
-                
-
-            }
-            
-            auctionFormSave.Close();*/
-        }
-
-
+        
         public byte[] getJPGFromImageControl(BitmapImage imageC)
         {
             MemoryStream memStream = new MemoryStream();
@@ -1314,6 +1348,148 @@ namespace AllFiller
         private void NameOfProdTB_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             signsNumberLabel.Content = 50 - NameOfProdTB.Text.Length;
+        }
+
+        private void PriceTB_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            OnlyNumberTexbox(PriceTB);
+
+        }
+        
+        public void OnlyNumberTexbox(TextBox tex)
+        {
+            tex.Text = tex.Text.Replace("p", "");
+            tex.Text = tex.Text.Replace("P", "");
+            tex.Text = tex.Text.Replace("o", "");
+            tex.Text = tex.Text.Replace("O", "");
+            tex.Text = tex.Text.Replace("i", "");
+            tex.Text = tex.Text.Replace("I", "");
+            tex.Text = tex.Text.Replace("u", "");
+            tex.Text = tex.Text.Replace("U", "");
+            tex.Text = tex.Text.Replace("y", "");
+            tex.Text = tex.Text.Replace("Y", "");
+            tex.Text = tex.Text.Replace("t", "");
+            tex.Text = tex.Text.Replace("T", "");
+            tex.Text = tex.Text.Replace("r", "");
+            tex.Text = tex.Text.Replace("R", "");
+            tex.Text = tex.Text.Replace("e", "");
+            tex.Text = tex.Text.Replace("E", "");
+            tex.Text = tex.Text.Replace("w", "");
+            tex.Text = tex.Text.Replace("W", "");
+            tex.Text = tex.Text.Replace("q", "");
+            tex.Text = tex.Text.Replace("Q", "");
+            tex.Text = tex.Text.Replace("a", "");
+            tex.Text = tex.Text.Replace("A", "");
+            tex.Text = tex.Text.Replace("s", "");
+            tex.Text = tex.Text.Replace("S", "");
+            tex.Text = tex.Text.Replace("d", "");
+            tex.Text = tex.Text.Replace("D", "");
+            tex.Text = tex.Text.Replace("f", "");
+            tex.Text = tex.Text.Replace("F", "");
+            tex.Text = tex.Text.Replace("g", "");
+            tex.Text = tex.Text.Replace("G", "");
+            tex.Text = tex.Text.Replace("h", "");
+            tex.Text = tex.Text.Replace("H", "");
+            tex.Text = tex.Text.Replace("j", "");
+            tex.Text = tex.Text.Replace("J", "");
+            tex.Text = tex.Text.Replace("k", "");
+            tex.Text = tex.Text.Replace("K", "");
+            tex.Text = tex.Text.Replace("l", "");
+            tex.Text = tex.Text.Replace("L", "");
+            tex.Text = tex.Text.Replace("m", "");
+            tex.Text = tex.Text.Replace("M", "");
+            tex.Text = tex.Text.Replace("n", "");
+            tex.Text = tex.Text.Replace("N", "");
+            tex.Text = tex.Text.Replace("b", "");
+            tex.Text = tex.Text.Replace("B", "");
+            tex.Text = tex.Text.Replace("v", "");
+            tex.Text = tex.Text.Replace("V", "");
+            tex.Text = tex.Text.Replace("c", "");
+            tex.Text = tex.Text.Replace("C", "");
+            tex.Text = tex.Text.Replace("x", "");
+            tex.Text = tex.Text.Replace("X", "");
+            tex.Text = tex.Text.Replace("z", "");
+            tex.Text = tex.Text.Replace("Z", "");
+            tex.Text = tex.Text.Replace("!", "");
+            tex.Text = tex.Text.Replace("@", "");
+            tex.Text = tex.Text.Replace("#", "");
+            tex.Text = tex.Text.Replace("$", "");
+            tex.Text = tex.Text.Replace("%", "");
+            tex.Text = tex.Text.Replace("^", "");
+            tex.Text = tex.Text.Replace("&", "");
+            tex.Text = tex.Text.Replace("*", "");
+            tex.Text = tex.Text.Replace("(", "");
+            tex.Text = tex.Text.Replace(")", "");
+            tex.Text = tex.Text.Replace("-", "");
+            tex.Text = tex.Text.Replace("_", "");
+            tex.Text = tex.Text.Replace("=", "");
+            tex.Text = tex.Text.Replace("+", "");
+            tex.Text = tex.Text.Replace("[", "");
+            tex.Text = tex.Text.Replace("{", "");
+            tex.Text = tex.Text.Replace("]", "");
+            tex.Text = tex.Text.Replace("}", "");
+            tex.Text = tex.Text.Replace("\\", "");
+            tex.Text = tex.Text.Replace("|", "");
+            tex.Text = tex.Text.Replace(";", "");
+            tex.Text = tex.Text.Replace(":", "");
+            tex.Text = tex.Text.Replace("'", "");
+            tex.Text = tex.Text.Replace("\"", "");
+            tex.Text = tex.Text.Replace(",", "");
+            tex.Text = tex.Text.Replace("<", "");
+            tex.Text = tex.Text.Replace(".", "");
+            tex.Text = tex.Text.Replace(">", "");
+            tex.Text = tex.Text.Replace("/", "");
+            tex.Text = tex.Text.Replace("?", "");
+            tex.Text = tex.Text.Replace("`", "");
+            tex.Text = tex.Text.Replace("~", "");
+            tex.Text = tex.Text.Replace("ł", "");
+            tex.Text = tex.Text.Replace("Ł", "");
+            tex.Text = tex.Text.Replace("ó", "");
+            tex.Text = tex.Text.Replace("ń", "");
+            tex.Text = tex.Text.Replace("Ń", "");
+            tex.Text = tex.Text.Replace("ś", "");
+            tex.Text = tex.Text.Replace("Ś", "");
+            tex.Text = tex.Text.Replace("Ó", "");
+            tex.Text = tex.Text.Replace("ź", "");
+            tex.Text = tex.Text.Replace("Ź", "");
+            tex.Text = tex.Text.Replace("ę", "");
+            tex.Text = tex.Text.Replace("Ę", "");
+            tex.Text = tex.Text.Replace("ą", "");
+            tex.Text = tex.Text.Replace("Ą", "");
+            tex.Text = tex.Text.Replace("ć", "");
+            tex.Text = tex.Text.Replace("Ć", "");
+            tex.Text = tex.Text.Replace(" ", "");
+            tex.Text = tex.Text.Replace("ż", "");
+            tex.Text = tex.Text.Replace("Ż", "");
+
+        }
+
+        private void SKUTB_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            OnlyNumberTexbox(SKUTB);
+        }
+
+        private void CustomKurierZwykłyTB_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            OnlyNumberTexbox(CustomKurierZwykłyTB);
+        }
+
+        private void CustomKurierPobranieTB_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            OnlyNumberTexbox(CustomKurierPobranieTB);
+        }        
+
+        private void OfferFrequencyCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(OfferFrequencyCB.SelectedIndex == 5)
+            {
+                CustomDates();
+            }
+        }
+
+        private void ClearAllBut_Click(object sender, RoutedEventArgs e)            //funkcja czyszcząca wszystkie tablice, texboxy itp.
+        {                                                                           //Przede wszystkim czyszczenie formFillera
+
         }
     }
 }

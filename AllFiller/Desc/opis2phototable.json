@@ -10,14 +10,24 @@
                     "url": "PHOTO_FID_16"
                 }, {
                     "type": "TEXT",
-                    "content": "<p>tekstowy opis przedmiotu</p>"
+                    "content": "<h1>AUTYT</h1>"
+                }]
+	    }, {
+                "items": [{
+                    "type": "TEXT",
+                    "content": "<p>OFFDESC</p>"
+                }]
+}, {
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_17"
                 }]
             }, {
                 "items": [{
                     "type": "IMAGE",
                     "url": "PHOTO_FID_343"
-                
                 }]
+	    
             }]
         }
         

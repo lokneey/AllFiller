@@ -1,0 +1,49 @@
+﻿{
+            "sections": [{                
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_342"
+                }]
+	    }, {
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_16"
+                }, {
+                    "type": "TEXT",
+                    "content": "<h1>AUTYT</h1>"
+                }]
+	    }, {
+                "items": [{
+                    "type": "TEXT",
+                    "content": "<p>OFFDESC</p>"
+                }]
+}, {
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_17"
+}, {
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_18"
+                }]
+}, {
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_19"
+}, {
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_20"
+                }]
+}, {
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_21"
+                }]
+            }, {
+                "items": [{
+                    "type": "IMAGE",
+                    "url": "PHOTO_FID_343"
+                }]
+	    
+            }]
+        }
+        
