@@ -40,7 +40,6 @@ namespace AllFiller.pl.allegro.webapi {
     [System.Xml.Serialization.SoapIncludeAttribute(typeof(StateInfoStruct))]
     [System.Xml.Serialization.SoapIncludeAttribute(typeof(SiteJournalDealsStruct))]
     [System.Xml.Serialization.SoapIncludeAttribute(typeof(SiteJournal))]
-    [System.Xml.Serialization.SoapIncludeAttribute(typeof(ShopsTagTypeStruct))]
     [System.Xml.Serialization.SoapIncludeAttribute(typeof(ShipmentPriceTypeStruct))]
     [System.Xml.Serialization.SoapIncludeAttribute(typeof(ShipmentPaymentInfoStruct))]
     [System.Xml.Serialization.SoapIncludeAttribute(typeof(SellerShipmentDataStruct))]
@@ -214,8 +213,6 @@ namespace AllFiller.pl.allegro.webapi {
         private System.Threading.SendOrPostCallback doGetShipmentDataForRelatedItemsOperationCompleted;
         
         private System.Threading.SendOrPostCallback doGetShipmentPriceTypesOperationCompleted;
-        
-        private System.Threading.SendOrPostCallback doGetShopsTagsOperationCompleted;
         
         private System.Threading.SendOrPostCallback doGetSiteJournalOperationCompleted;
         
@@ -480,9 +477,6 @@ namespace AllFiller.pl.allegro.webapi {
         
         /// <remarks/>
         public event doGetShipmentPriceTypesCompletedEventHandler doGetShipmentPriceTypesCompleted;
-        
-        /// <remarks/>
-        public event doGetShopsTagsCompletedEventHandler doGetShopsTagsCompleted;
         
         /// <remarks/>
         public event doGetSiteJournalCompletedEventHandler doGetSiteJournalCompleted;
@@ -2565,37 +2559,6 @@ namespace AllFiller.pl.allegro.webapi {
         }
         
         /// <remarks/>
-        [System.Web.Services.Protocols.SoapRpcMethodAttribute("#dogetshopstags", RequestNamespace="urn:AllegroWebApi", ResponseNamespace="urn:AllegroWebApi")]
-        [return: System.Xml.Serialization.SoapElementAttribute("shops-tags-count")]
-        public int doGetShopsTags([System.Xml.Serialization.SoapElementAttribute("session-id")] string sessionid, [System.Xml.Serialization.SoapElementAttribute("shops-tags")] out ShopsTagTypeStruct[] shopstags) {
-            object[] results = this.Invoke("doGetShopsTags", new object[] {
-                        sessionid});
-            shopstags = ((ShopsTagTypeStruct[])(results[1]));
-            return ((int)(results[0]));
-        }
-        
-        /// <remarks/>
-        public void doGetShopsTagsAsync(string sessionid) {
-            this.doGetShopsTagsAsync(sessionid, null);
-        }
-        
-        /// <remarks/>
-        public void doGetShopsTagsAsync(string sessionid, object userState) {
-            if ((this.doGetShopsTagsOperationCompleted == null)) {
-                this.doGetShopsTagsOperationCompleted = new System.Threading.SendOrPostCallback(this.OndoGetShopsTagsOperationCompleted);
-            }
-            this.InvokeAsync("doGetShopsTags", new object[] {
-                        sessionid}, this.doGetShopsTagsOperationCompleted, userState);
-        }
-        
-        private void OndoGetShopsTagsOperationCompleted(object arg) {
-            if ((this.doGetShopsTagsCompleted != null)) {
-                System.Web.Services.Protocols.InvokeCompletedEventArgs invokeArgs = ((System.Web.Services.Protocols.InvokeCompletedEventArgs)(arg));
-                this.doGetShopsTagsCompleted(this, new doGetShopsTagsCompletedEventArgs(invokeArgs.Results, invokeArgs.Error, invokeArgs.Cancelled, invokeArgs.UserState));
-            }
-        }
-        
-        /// <remarks/>
         [System.Web.Services.Protocols.SoapRpcMethodAttribute("#dogetsitejournal", RequestNamespace="urn:AllegroWebApi", ResponseNamespace="urn:AllegroWebApi")]
         [return: System.Xml.Serialization.SoapElementAttribute("site-journal-array")]
         public SiteJournal[] doGetSiteJournal([System.Xml.Serialization.SoapElementAttribute("session-handle")] string sessionhandle, [System.Xml.Serialization.SoapElementAttribute("starting-point")] long startingpoint, [System.Xml.Serialization.SoapElementAttribute("info-type")] int infotype) {
@@ -3860,6 +3823,8 @@ namespace AllFiller.pl.allegro.webapi {
         
         private string packageidField;
         
+        private string operatornameField;
+        
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute("operator-id")]
         public int operatorid {
@@ -3879,6 +3844,17 @@ namespace AllFiller.pl.allegro.webapi {
             }
             set {
                 this.packageidField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.SoapElementAttribute("operator-name")]
+        public string operatorname {
+            get {
+                return this.operatornameField;
+            }
+            set {
+                this.operatornameField = value;
             }
         }
     }
@@ -5940,51 +5916,6 @@ namespace AllFiller.pl.allegro.webapi {
             }
             set {
                 this.itemselleridField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.7.2556.0")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.SoapTypeAttribute(Namespace="urn:AllegroWebApi")]
-    public partial class ShopsTagTypeStruct {
-        
-        private int idField;
-        
-        private string codeField;
-        
-        private string nameField;
-        
-        /// <remarks/>
-        public int id {
-            get {
-                return this.idField;
-            }
-            set {
-                this.idField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public string code {
-            get {
-                return this.codeField;
-            }
-            set {
-                this.codeField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public string name {
-            get {
-                return this.nameField;
-            }
-            set {
-                this.nameField = value;
             }
         }
     }
@@ -8274,6 +8205,8 @@ namespace AllFiller.pl.allegro.webapi {
         
         private int postbuyformoperatoridField;
         
+        private string postbuyformoperatornameField;
+        
         private string postbuyformpackageidField;
         
         private string postbuyformpackagestatusField;
@@ -8286,6 +8219,17 @@ namespace AllFiller.pl.allegro.webapi {
             }
             set {
                 this.postbuyformoperatoridField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.SoapElementAttribute("post-buy-form-operator-name")]
+        public string postbuyformoperatorname {
+            get {
+                return this.postbuyformoperatornameField;
+            }
+            set {
+                this.postbuyformoperatornameField = value;
             }
         }
         
@@ -15256,7 +15200,7 @@ namespace AllFiller.pl.allegro.webapi {
         
         private byte[] fvalueimageField;
         
-        private float fvaluedatetimeField;
+        private long fvaluedatetimeField;
         
         private string fvaluedateField;
         
@@ -15322,7 +15266,7 @@ namespace AllFiller.pl.allegro.webapi {
         
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute("fvalue-datetime")]
-        public float fvaluedatetime {
+        public long fvaluedatetime {
             get {
                 return this.fvaluedatetimeField;
             }
@@ -17491,40 +17435,6 @@ namespace AllFiller.pl.allegro.webapi {
             get {
                 this.RaiseExceptionIfNecessary();
                 return ((ShipmentPriceTypeStruct[])(this.results[0]));
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.7.2556.0")]
-    public delegate void doGetShopsTagsCompletedEventHandler(object sender, doGetShopsTagsCompletedEventArgs e);
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Web.Services", "4.7.2556.0")]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class doGetShopsTagsCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
-        
-        private object[] results;
-        
-        internal doGetShopsTagsCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
-                base(exception, cancelled, userState) {
-            this.results = results;
-        }
-        
-        /// <remarks/>
-        public int Result {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((int)(this.results[0]));
-            }
-        }
-        
-        /// <remarks/>
-        public ShopsTagTypeStruct[] shopstags {
-            get {
-                this.RaiseExceptionIfNecessary();
-                return ((ShopsTagTypeStruct[])(this.results[1]));
             }
         }
     }

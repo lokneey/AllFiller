@@ -16,3 +16,5 @@ D:\AllFiller\AllFiller\AllFiller\obj\Debug\AllFiller.pdb
 D:\AllFiller\AllFiller\AllFiller\bin\Debug\HtmlAgilityPack.dll
 D:\AllFiller\AllFiller\AllFiller\bin\Debug\HtmlAgilityPack.pdb
 D:\AllFiller\AllFiller\AllFiller\bin\Debug\HtmlAgilityPack.xml
+D:\AllFiller\AllFiller\AllFiller\bin\Debug\FontAwesome.WPF.dll
+D:\AllFiller\AllFiller\AllFiller\bin\Debug\FontAwesome.WPF.xml
