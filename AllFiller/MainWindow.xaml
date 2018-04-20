@@ -87,6 +87,7 @@
         </Popup>
         <Button x:Name="WystawTabBut" Content="Wystaw" FontSize="14" FontWeight="Bold" HorizontalAlignment="Left" Margin="353.4,15,0,0" VerticalAlignment="Top" Width="85" Height="30" Grid.Column="1" Click="WystawTabBut_Click"/>
         <Button x:Name="ZobaczTabBut" Content="Zobacz" FontSize="14" FontWeight="Bold" HorizontalAlignment="Left" Margin="472.4,15,0,0" VerticalAlignment="Top" Width="85" Height="30" Grid.Column="1" Click="ZobaczTabBut_Click"/>
-        <DataGrid x:Name="DownloadedAuctionData" HorizontalAlignment="Left" Height="501" Margin="39,177,0,0" VerticalAlignment="Top" Width="844" Grid.ColumnSpan="2"/>
+        <Button x:Name="ActTabBut" Content="Aktualizuj stany magazynowe" Visibility="Hidden" FontSize="14" FontWeight="Bold" HorizontalAlignment="Left" Margin="39,142,0,0" VerticalAlignment="Top" Width="238" Height="30" Click="ActTabBut_Click" />
+        <DataGrid x:Name="DownloadedAuctionData" HorizontalAlignment="Left" Visibility="Hidden" Height="501" Margin="39,177,0,0" VerticalAlignment="Top" Width="844" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>
