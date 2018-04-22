@@ -65,7 +65,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Allegro\AccountLogIn.cs" />
+    <Compile Include="Allegro\AllegroFormFiller.cs" />
     <Compile Include="Allegro\AuctionMaker.cs" />
+    <Compile Include="Allegro\AuctionsInfoDownloader.cs" />
+    <Compile Include="Allegro\UpToDateAuctions.cs" />
     <Compile Include="Support\CodeArtist.cs" />
     <Compile Include="Support\ModelsDownloader.cs" />
     <Compile Include="Support\PhotoDown.cs" />
@@ -701,5 +705,6 @@
     <Resource Include="Table\4451.png" />
     <Resource Include="Table\4452.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

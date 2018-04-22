@@ -16,7 +16,7 @@ namespace AllFiller.Support
 
         public ModelsDownloader() { }
 
-        public ObservableCollection<string>  ModelDownloader(HtmlNode[] Model, System.Windows.Controls.ListBox List)
+        public ObservableCollection<string>  ModelDownloader(HtmlNode[] Model)
         {
             for (int modelIndexer = 0; modelIndexer < Model.Length; modelIndexer++)
             {
@@ -31,8 +31,7 @@ namespace AllFiller.Support
                     modelMaker = modelMaker.Replace("<option value=", "");
                     modelMaker = modelMaker.Replace("\"", "");
                 }
-                catch { }
-                List.Items.Add(modelMaker);
+                catch { }                
                 modelParts.Add(modelMaker);
             }
 

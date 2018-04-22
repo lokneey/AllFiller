@@ -22,7 +22,6 @@
         <Label x:Name="CenaLB" Content="Cena" HorizontalAlignment="Left" Margin="64,90,0,0" VerticalAlignment="Top"/>
         <Button x:Name="AucDownBT" Visibility="Hidden" Content="Pobierz informacje o aukcjach" HorizontalAlignment="Left" Margin="353.4,84,0,0" VerticalAlignment="Top" Width="204" Click="StartBut_Click" Height="29" Grid.Column="1"/>
         <Button x:Name="LogBut" Content="Log In" HorizontalAlignment="Left" Margin="353.7,50,0,0" VerticalAlignment="Top" Width="204" Click="LogBut_Click" Height="30" Grid.Column="1"/>
-        <ListBox x:Name ="Shower" HorizontalAlignment="Left" Height="176" Margin="111.7,562,0,0" VerticalAlignment="Top" Width="176" Grid.Column="1"/>
         <Button x:Name="StartAuction" Content="Pobierz dane produktu" HorizontalAlignment="Left" Margin="353.7,85,0,0" VerticalAlignment="Top" Width="204" Click="StartAuction_Click" Height="30
                 " Grid.Column="1"/>
         <Button x:Name="Continue" Content="Wystaw aukcję" HorizontalAlignment="Left" Margin="353.7,120,0,0" VerticalAlignment="Top" Width="204" Height="30" Click="Continue_Click" Grid.Column="1"/>
@@ -34,7 +33,7 @@
         <Label x:Name="SKULB" Content="SKU" HorizontalAlignment="Left" Margin="64,152,0,0" VerticalAlignment="Top"/>
         <CheckBox x:Name="Kurier" Content="Kurier do 30 kg" HorizontalAlignment="Left" Margin="378.4,243,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <CheckBox x:Name="Paleta" Content="Paleta" HorizontalAlignment="Left" Margin="378.4,263,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <CheckBox x:Name="List" Content="List polecony" HorizontalAlignment="Left" Margin="378.4,283,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <CheckBox x:Name="ListP" Content="List polecony" HorizontalAlignment="Left" Margin="378.4,283,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <CheckBox x:Name="TylkoOsobisty" Content="Tylko odbiór osobisty" HorizontalAlignment="Left" Margin="378.4,303,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <CheckBox x:Name="InnaDostawa" Content="Inne" HorizontalAlignment="Left" Margin="378.4,323,0,0" VerticalAlignment="Top" Grid.Column="1"/>
         <Label x:Name="OpcjeDostawyLB" Content="Opcje dostawy:" HorizontalAlignment="Left" Margin="353.4,212,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.454,0.696" Grid.Column="1"/>
@@ -63,7 +62,7 @@
         <Label x:Name="sessionIDLabel" Content="Identyfikator sesji: " HorizontalAlignment="Left" Margin="353.4,54,0,0" VerticalAlignment="Top" Grid.Column="1" Visibility="Hidden"/>
         <TextBox x:Name="sessionHandlerTB" Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="466.4,56,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="91" Visibility="Hidden" IsReadOnly="True"/>
         <Button x:Name="ClearAllBut" Content="Clear All" HorizontalAlignment="Left" Margin="64,217,0,0" VerticalAlignment="Top" Width="85" Click="ClearAllBut_Click" Height="31"/>
-        <Button x:Name="InMagazineBut" Visibility="Hidden" Content="Aktualizuj stany magazynowe" HorizontalAlignment="Left" Margin="353.4,120,0,0" VerticalAlignment="Top" Width="204" Height="29" Grid.Column="1"/>
+        <Button x:Name="ActTabBut" Visibility="Hidden" Content="Aktualizuj stany magazynowe" HorizontalAlignment="Left" Margin="353.4,120,0,0" VerticalAlignment="Top" Width="204" Height="29" Grid.Column="1" Click="ActTabBut_Click"/>
         <Button x:Name="CategoriesPopup" Content="Wybierz kategirie" HorizontalAlignment="Left" Margin="353.4,177,0,0" VerticalAlignment="Top" Width="204" Height="30" Grid.Column="1" Click="CategoriesPopup_Click"/>
         <Popup Name="CatPOP" IsOpen="False" Placement="Center" Width="588" Height="365" AllowsTransparency="True" PopupAnimation="Fade" Opacity="0.5" >
             <StackPanel Background="GhostWhite" >
@@ -87,7 +86,6 @@
         </Popup>
         <Button x:Name="WystawTabBut" Content="Wystaw" FontSize="14" FontWeight="Bold" HorizontalAlignment="Left" Margin="353.4,15,0,0" VerticalAlignment="Top" Width="85" Height="30" Grid.Column="1" Click="WystawTabBut_Click"/>
         <Button x:Name="ZobaczTabBut" Content="Zobacz" FontSize="14" FontWeight="Bold" HorizontalAlignment="Left" Margin="472.4,15,0,0" VerticalAlignment="Top" Width="85" Height="30" Grid.Column="1" Click="ZobaczTabBut_Click"/>
-        <Button x:Name="ActTabBut" Content="Aktualizuj stany magazynowe" Visibility="Hidden" FontSize="14" FontWeight="Bold" HorizontalAlignment="Left" Margin="39,142,0,0" VerticalAlignment="Top" Width="238" Height="30" Click="ActTabBut_Click" />
         <DataGrid x:Name="DownloadedAuctionData" HorizontalAlignment="Left" Visibility="Hidden" Height="501" Margin="39,177,0,0" VerticalAlignment="Top" Width="844" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>

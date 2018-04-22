@@ -14,6 +14,7 @@ using System.Windows.Threading;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Data;
+using AllFiller.Allegro;
 
 namespace AllFiller
 {
@@ -21,36 +22,28 @@ namespace AllFiller
     /// Logika interakcji dla klasy MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {
-        //Zrób trzy tryby, full auto, semi auto (domyślnie), ręczny
-        //Jeżeli brak ilosci w magazynie lub SKU(lepsze) to pobiera dane z jakiegoś dokumentu
+    {        
         //Zrób zapisywanie do pliku wszystkich numerów aukcji i ich tytułów, które wystawisz
-        //Dorób pokazywanie zaciągniętych obrazów i przypisywanie ich wtedy do globalnych zmiennych
+        //Dorób pokazywanie pobranych obrazów i przypisywanie ich wtedy do globalnych zmiennych
 
         //Ogólne
-        AllegroWebApiService service;   
+        AllegroWebApiService service = new AllegroWebApiService();
         string sessionHandler;
         long offset = 0;
         long serverTime = 0;
         UInt32 imageCounter;               
 
         //Logowanie
-        string login = "maszyny2@op.pl";
-        string pass = "1963Alla";
-        int countryCode = 1;
-        string apiKey = "a1a09772";
+        string apiKey = "";
         long version;
+        AccountLogIn logIn = new AccountLogIn();
 
         //Aukcja
-        UInt32 numOfProd;
-        string price;
-        string nameOfProd;
-        string description;
-
-        //Pobieranie aukcji
-        long[] auctionsID;
-        MyAccountStruct2[] accountStructTable;
-
+        //UInt32 numOfProd;
+        //string price;
+        //string nameOfProd;
+        //string description;
+        
         //Pobieranie info ze strony
         string currentURL;
         string currentPrice;
@@ -60,32 +53,19 @@ namespace AllFiller
         string currentSKU;
         string currentDescription;
         int spaceSearcher = 49;
-        public ObservableCollection<string> currrentModel = new ObservableCollection<string>();
-        //string[] currentModels;
+        public ObservableCollection<string> currrentModel = new ObservableCollection<string>();  
 
         //Wystawianie
         string verstr;
         long verkey;
         FieldsValue[] formFiller = new FieldsValue[410];
-        ItemTemplateCreateStruct itemStruct;
-        VariantStruct[] variants;
-        TagNameStruct[] auctionTags;
-        AfterSalesServiceConditionsStruct afterSale;
-        string addicionalServicesGroup;
-        string itemCost = null;
-        int itemPromStatus;
         DateTime currentDate;
         DateTime currentTime;
-        UInt32 imageSelector;
-        bool isThereATable = false;
-        string descriptionWorker;
         DateTime timeWorker;
         DateTime[] dateWorker = new DateTime[1000];
         UInt32 numberOfDataWorkers = 0;
         List<int> categoriesList = new List<int>();
-        bool toMuchWeight = false;
-        bool toMuchWeightNoticed = false;
-        
+        AllegroFormFiller fillIt = new AllegroFormFiller();
 
         public MainWindow()
         {
@@ -93,8 +73,7 @@ namespace AllFiller
 
             this.Title = "AllFiller - Łukasz Granat";
 
-            service = new AllegroWebApiService();
-            GetLocalVersionKey();
+            version = logIn.GetLocalVersionKey(service);
 
             currentDate = DateTime.Now;
             Kurier.IsChecked = true;
@@ -152,21 +131,7 @@ namespace AllFiller
             DownloadedAuctionData.Columns.Add(Column9);*/            
         }
 
-        public long GetLocalVersionKey() 
-        {
-            try
-            {
-                var info = service.doQuerySysStatus(1, 1, apiKey, out version);
-                Shower.Items.Add("Kod wersji: " + version);
-                
-            }
-            catch
-            {
-                MessageBoxResult wrongResult = MessageBox.Show("Zgubiłem klucz wersji. Zrestartuj mnie!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-            }
-            return version;
-        }
+        
 
         public async void LoadingShower()       //Trochę spowalnia działanie
         {
@@ -185,29 +150,12 @@ namespace AllFiller
             LoadingShower();
             await Task.Run(() =>
              {
-                 long offset = 0;
-                 long serverTime = 0;
-                 try
-                 {
-                     sessionHandler = service.doLogin(login, pass, 1, apiKey, version, out offset, out serverTime);
-                 }
-                 catch
-                 {
-                     Shower.Items.Add("Logowanie się nie powiodło");
-                     MessageBoxResult wrongResult = MessageBox.Show("Błąd w session Handlerze", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                     if (wrongResult == MessageBoxResult.OK)
-                     {
-                         Application.Current.Shutdown();
-                     }
-                 }
+                 sessionHandler = logIn.LogIn(sessionHandler, version, service);
 
                  sessionHandlerTB.Dispatcher.Invoke(delegate { sessionHandlerTB.Text = sessionHandler; });
                  sessionHandlerTB.Dispatcher.Invoke(delegate { sessionHandlerTB.Visibility = Visibility.Visible; });
                  sessionIDLabel.Dispatcher.Invoke(delegate { sessionIDLabel.Visibility = Visibility.Visible; });
-                 Shower.Dispatcher.Invoke(delegate { Shower.Items.Add(sessionHandler); });
-                 Shower.Dispatcher.Invoke(delegate { Shower.Items.Add(offset.ToString()); });
-                 Shower.Dispatcher.Invoke(delegate { Shower.Items.Add(serverTime.ToString()); });
-
+                 
                  LogBut.Dispatcher.Invoke(delegate { LogBut.Visibility = Visibility.Hidden; });
 
              });
@@ -248,41 +196,13 @@ namespace AllFiller
             LoadingShower();
             await Task.Run(() =>            //Trzeba wszystko clearować przed ponownym pobraniem
             {
-                long offset = 0;
+                
                 DownloadedAuctionData.Dispatcher.Invoke(delegate
                 {
                     DownloadedAuctionData.Items.Clear();
                 });
-                try
-                {
-                    accountStructTable = service.doMyAccount2(sessionHandler, "sell", (int)offset, auctionsID, 100);
-                }
-                catch
-                {
-                    Shower.Dispatcher.Invoke(delegate { Shower.Items.Add("Nie można sprawdzić obecnych aukcji"); });
-                    MessageBoxResult wrongResult = MessageBox.Show("Błąd podczas pobierania aukcji", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    if (wrongResult == MessageBoxResult.OK)
-                    {
-                        return;
-                    }
-                }
-
-                foreach (MyAccountStruct2 accountStruct in accountStructTable)
-                {
-                    DownloadedAuctionData.Dispatcher.Invoke(delegate
-                    {
-                        DownloadedAuctionData.Items.Add(new DataGridItem() { Column1 = accountStruct.myaccountarray[9],
-                            Column2 = accountStruct.myaccountarray[33],
-                            Column10 = accountStruct.myaccountarray[27],
-                            Column3 = accountStruct.myaccountarray[4] + " zł",
-                            Column4 = accountStruct.myaccountarray[17],
-                            Column5 = accountStruct.myaccountarray[16],
-                            Column6 = accountStruct.myaccountarray[0],
-                            Column7 = accountStruct.myaccountarray[6],
-                            Column8 = accountStruct.myaccountarray[7],                                          
-                        } );
-                    });
-                }
+                AuctionsInfoDownloader down = new AuctionsInfoDownloader();
+                down.Download(sessionHandler, DownloadedAuctionData, service);
             });
             LoadingKiller(); 
         }
@@ -375,8 +295,7 @@ namespace AllFiller
                     try
                     {
                         HtmlNode[] Model = document.DocumentNode.SelectNodes("//option").ToArray();
-                        currrentModel = currentModels.ModelDownloader(Model, Shower);
-                        SKUTB.Dispatcher.Invoke(delegate { Shower.Items.Add(currrentModel); });
+                        currrentModel = currentModels.ModelDownloader(Model);                        
                     }
                     catch
                     { }
@@ -401,7 +320,7 @@ namespace AllFiller
                 {
                     if (Kurier.IsChecked == true) { }
                     else if (Paleta.IsChecked == true) { }
-                    else if (List.IsChecked == true) { }
+                    else if (ListP.IsChecked == true) { }
                     else if (TylkoOsobisty.IsChecked == true) { }   
                 else if (InnaDostawa.IsChecked == true) { }
                     else
@@ -422,221 +341,13 @@ namespace AllFiller
                 Dispatcher.Invoke(DispatcherPriority.Normal, deliveryChecker);
                 Action auctionChecker = delegate ()
                 {
-                    try
-                    {
-                        SellFormFieldsForCategoryStruct auctionForm = service.doGetSellFormFieldsForCategory(apiKey, 1, 252416);
-                        timeWorker = DateTime.Now.AddMinutes(20);      
-                        int i = 0;
-                        int x = 0;
-                        if (categoriesList.Count != 0)
-                        {
-                            caty:
-                            if (toMuchWeight == false)
-                            {
-                                if (x < categoriesList.Count)
-                                {
-                                    int category = categoriesList[x];
-
-                                    if (timeWorker == null)
-                                    {
-                                        timeWorker = DateTime.Now.AddMinutes(20);      
-                                    }
-                                    next:
-                                    switch (i)
-                                    {
-                                        case 0:
-                                            if (OfferFrequencyCB.SelectedIndex == i)        //Jednorazowo
-                                            {
-                                                timeWorker = DateTime.Now.AddMinutes(12);
-                                                if (categoriesList.Count > 1)
-                                                {
-                                                    MakeAuction2(timeWorker, category);
-                                                }
-                                                else
-                                                {
-                                                    MakeAuction(category);
-                                                }
-                                                x++;
-                                                goto caty;
-
-                                            }
-                                            else
-                                            {
-                                                i++;
-                                                goto next;
-                                            }
-
-                                            break;
-                                        case 1:
-                                            if (OfferFrequencyCB.SelectedIndex == i)        //Co dwa tygodnie
-                                            {
-                                                timeWorker = DateTime.Now.AddMinutes(12);
-                                                if (categoriesList.Count > 1)
-                                                {
-                                                    MakeAuction2(timeWorker, category);
-                                                }
-                                                else
-                                                {
-                                                    MakeAuction(category);
-                                                }
-
-                                                timeWorker = DateTime.Now.AddMinutes(20);
-                                                timeWorker = timeWorker.AddDays(14);
-                                                MakeAuction2(timeWorker, category);
-                                                x++;
-                                                goto caty;
-                                            }
-                                            else
-                                            {
-                                                i++;
-                                                goto next;
-                                            }
-
-                                            break;
-                                        case 2:
-                                            if (OfferFrequencyCB.SelectedIndex == i)        //Co tydzień
-                                            {
-                                                timeWorker = DateTime.Now.AddMinutes(12);
-                                                if (categoriesList.Count > 1)
-                                                {
-                                                    MakeAuction2(timeWorker, category);
-                                                }
-                                                else
-                                                {
-                                                    MakeAuction(category);
-                                                }
-
-                                                timeWorker = DateTime.Now.AddMinutes(20);
-                                                timeWorker = timeWorker.AddDays(7);
-                                                MakeAuction2(timeWorker, category);     
-                                                timeWorker = timeWorker.AddDays(7);
-                                                MakeAuction2(timeWorker, category);
-                                                timeWorker = timeWorker.AddDays(7);
-                                                MakeAuction2(timeWorker, category);
-                                                x++;
-                                                goto caty;
-                                            }
-                                            else
-                                            {
-                                                i++;
-                                                goto next;
-                                            }
-
-                                            break;
-                                        case 3:
-                                            if (OfferFrequencyCB.SelectedIndex == i)        //Co 3 dni
-                                            {
-                                                timeWorker = DateTime.Now.AddMinutes(12);
-                                                if (categoriesList.Count > 1)
-                                                {
-                                                    MakeAuction2(timeWorker, category);
-                                                }
-                                                else
-                                                {
-                                                    MakeAuction(category);
-                                                }
-
-                                                timeWorker = DateTime.Now.AddMinutes(20);
-                                                for (UInt32 z = 0; z < 10; z++)
-                                                {
-                                                    timeWorker = timeWorker.AddDays(3);
-                                                    MakeAuction2(timeWorker, category);
-                                                }
-                                                x++;
-                                                goto caty;
-                                            }
-                                            else
-                                            {
-                                                i++;
-                                                goto next;
-                                            }
-
-                                            break;
-                                        case 4:
-                                            if (OfferFrequencyCB.SelectedIndex == i)        //Codziennie
-                                            {
-                                                timeWorker = DateTime.Now.AddMinutes(12);
-                                                if (categoriesList.Count > 1)
-                                                {
-                                                    MakeAuction2(timeWorker, category);
-                                                }
-                                                else
-                                                {
-                                                    MakeAuction(category);
-                                                }
-                                                timeWorker = DateTime.Now.AddMinutes(20);
-                                                for (UInt32 z = 0; z < 31; z++)
-                                                {
-                                                    timeWorker = timeWorker.AddDays(1);
-                                                    MakeAuction2(timeWorker, category);
-                                                }
-                                                x++;
-                                                goto caty;
-                                            }
-                                            else
-                                            {
-                                                i++;
-                                                goto next;
-                                            }
-
-                                            break;
-                                        case 5:                     
-                                            if (OfferFrequencyCB.SelectedIndex == i)        //Custom
-                                            {
-                                                CustomDates();
-                                                if (OfferCallendar.SelectedDate != null)
-                                                {
-                                                    if (numberOfDataWorkers > 0)
-                                                    {
-                                                        for (UInt32 z = 0; z < numberOfDataWorkers; z++)
-                                                        {
-
-                                                            MakeAuction2(dateWorker[z], category);
-                                                        }
-                                                    }
-                                                }
-                                                x++;
-                                                goto caty;
-                                            }
-
-                                            else
-                                            {
-                                                i++;
-                                            }         
-                                            Array.Clear(dateWorker, 0, dateWorker.Length);
-                                            numberOfDataWorkers = 0;
-                                            break;
-                                    }
-
-
-
-                                }
-                            }
-                        }
-                        else
-                        {
-                            MessageBoxResult wrongResult = MessageBox.Show("Musisz wybrać kategorie!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                        toMuchWeight = false;
-                        toMuchWeightNoticed = false;
-
-                    }
-
-
-
-                    catch
-                    {
-                        Shower.Items.Add("Wystawianie oferty nie powiodło");
-                        MessageBoxResult wrongResult = MessageBox.Show("Błąd przy wystawianiu oferty!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                    }
+                    AuctionMaker all = new AuctionMaker();
+                    all.MakeAuction(timeWorker, categoriesList,  dateWorker,  numberOfDataWorkers,  OfferCallendar,  OfferFrequencyCB,  service,  apiKey, fillIt, currentOrginalName, imageCounter, formFiller, sessionHandler, NameOfProdTB, AmountTB, PriceTB, SKUTB, CustomKurierZwykłyTB, CustomKurierPobranieTB, DescriptionTB, Kurier, Paleta, ListP, TylkoOsobisty, InnaDostawa);
                 };
                 Dispatcher.Invoke(DispatcherPriority.Normal, auctionChecker);
 
                 categoriesList.Clear();
-                Shower.Dispatcher.Invoke(delegate { Shower.Items.Add("Koszt: " + itemCost); });
-                Shower.Dispatcher.Invoke(delegate { Shower.Items.Add("NR:" + itemPromStatus); });
+                
 
 
             });
@@ -644,905 +355,7 @@ namespace AllFiller
             LoadingKiller();
         }
 
-        public void MakeAuction(int categorySwitch)
-        {
-            formFiller[0] = new FieldsValue();
-            formFiller[0].fid = 0;
-
-            formFiller[401] = new FieldsValue();       //Stan
-            formFiller[401].fid = 20365;
-            formFiller[401].fvalueint = 1;
-
-            formFiller[402] = new FieldsValue();       //Stan
-            formFiller[402].fid = 32611;
-            formFiller[402].fvalueint = 1;
-            
-            afterSale = new AfterSalesServiceConditionsStruct();
-            afterSale.warranty = "de4e9e97-f3fa-445e-ba87-a9d70f3e670e";
-            afterSale.returnpolicy = "e711157a-609b-4845-a916-37eae22a94e5";
-            afterSale.impliedwarranty = "8e2c1aca-5237-4b36-9853-1783a8d4bd97";
-
-            //Określanie częstotliwości wystawiania
-            formFiller[1] = new FieldsValue();
-            formFiller[1].fid = 1;
-            formFiller[1].fvaluestring = NameOfProdTB.Text;
-            
-            formFiller[2] = new FieldsValue();
-            formFiller[2].fid = 2;
-            formFiller[2].fvalueint = categorySwitch;               
-
-            formFiller[4] = new FieldsValue();
-            formFiller[4].fid = 4;
-            formFiller[4].fvalueint = 99;
-            formFiller[5] = new FieldsValue();
-            formFiller[5].fid = 5;
-            if (AmountTB.Text != "")
-            {
-                if (AmountTB.Text != "0")
-                {
-                    formFiller[5].fvalueint = Int32.Parse(AmountTB.Text);       //Zabezpieczenie gdyby było 0
-                }
-                else
-                {
-                    formFiller[5].fvalueint = 1;
-                }
-            }
-            else
-            {
-                formFiller[5].fvalueint = 1;
-            }          
-            formFiller[8] = new FieldsValue();
-            formFiller[8].fid = 8;
-            formFiller[8].fvaluefloat = float.Parse(PriceTB.Text);
-            formFiller[9] = new FieldsValue();
-            formFiller[9].fid = 9;
-            formFiller[9].fvalueint = 1;
-            formFiller[10] = new FieldsValue();
-            formFiller[10].fid = 10;
-            formFiller[10].fvalueint = 15;
-            formFiller[11] = new FieldsValue();
-            formFiller[11].fid = 11;
-            formFiller[11].fvaluestring = "Poznań";
-            formFiller[12] = new FieldsValue();
-            formFiller[12].fid = 12;
-            formFiller[12].fvalueint = 1;
-            formFiller[14] = new FieldsValue();
-            formFiller[14].fid = 14;
-            formFiller[14].fvalueint = 32;
-
-
-            string path = AppDomain.CurrentDomain.BaseDirectory;    //Dopisz kod zamieniający istniejący plik na nowy i zrób funkcję zapisującą w oddzielnym pliku
-            path = path.Replace(@"\", "/");
-            string normalPath = path;
-            path = path + "/Auctions/" + currentOrginalName + "/Photos/" + currentOrginalName;
-
-            BitmapImage photoBitmapBeggining = new BitmapImage(new Uri(normalPath + "head.png"));     //W .Net robi się to inaczej           
-            byte[] photoBeggining = getJPGFromImageControl(photoBitmapBeggining);
-            formFiller[342] = new FieldsValue();
-            formFiller[342].fid = 342;
-            formFiller[342].fvalueimage = photoBeggining;
-
-            if (imageCounter > 7)
-            {
-                imageCounter = 7;
-            }
-            imageSelector = 0;
-            for (UInt32 i = 16; i < 16 + imageCounter; i++)
-            {
-                BitmapImage photoBitmap = new BitmapImage(new Uri(path + imageSelector + ".jpg"));     //Zrób sprawdzanie dla różnych typów obrazów jpg png gif może przez exists
-                byte[] photo = getJPGFromImageControl(photoBitmap);
-                formFiller[i] = new FieldsValue();
-                formFiller[i].fid = (int)i;
-                formFiller[i].fvalueimage = photo;
-                imageSelector++;
-            }
-            if (File.Exists(normalPath + "Table/" + SKUTB.Text + ".png"))
-            {
-                BitmapImage photoBitmapTable = new BitmapImage(new Uri(normalPath + "Table/" + SKUTB.Text + ".png"));    //Sprawdzaj, czy tabela dla danego kodu istnieje
-                byte[] photoTable = getJPGFromImageControl(photoBitmapTable);
-                formFiller[343] = new FieldsValue();
-                formFiller[343].fid = 343;
-                formFiller[343].fvalueimage = photoTable;
-                isThereATable = true;
-            }
-            
-            formFiller[27] = new FieldsValue();
-            formFiller[27].fid = 27;
-            formFiller[27].fvaluestring = "Numer konta bankowego: 97 1140 2004 0000 3102 7532 3271";
-            formFiller[28] = new FieldsValue();
-            formFiller[28].fid = 28;
-            formFiller[28].fvalueint = 0;
-            formFiller[29] = new FieldsValue();
-            formFiller[29].fid = 29;
-            formFiller[29].fvalueint = 1;
-            formFiller[30] = new FieldsValue();
-            formFiller[30].fid = 30;
-            formFiller[30].fvalueint = 1;
-            formFiller[32] = new FieldsValue();
-            formFiller[32].fid = 32;
-            formFiller[32].fvaluestring = "60-715";
-            formFiller[33] = new FieldsValue();
-            formFiller[33].fid = 33;
-            formFiller[33].fvaluestring = "97 1140 2004 0000 3102 7532 3271";
-            formFiller[34] = new FieldsValue();
-            formFiller[34].fid = 34;
-            formFiller[34].fvaluestring = "97 1140 2004 0000 3102 7532 3271";
-            formFiller[35] = new FieldsValue();
-            formFiller[35].fid = 35;
-            formFiller[35].fvalueint = 1;
-
-            if (TylkoOsobisty.IsChecked == true)
-            {
-                Paleta.IsChecked = false;
-                Kurier.IsChecked = false;
-                List.IsChecked = false;
-                InnaDostawa.IsChecked = false;
-            }
-
-            if (Paleta.IsChecked == false)
-            {
-                if (Kurier.IsChecked == true)
-                {
-                    formFiller[400] = new FieldsValue();      
-                    formFiller[400].fid = 22164;
-                    formFiller[400].fvaluefloat = 20;
-
-                    formFiller[44] = new FieldsValue();                   //Kurier opłacony z góry
-                    formFiller[44].fid = 44;
-                    formFiller[44].fvaluefloat = 21;
-                    formFiller[144] = new FieldsValue();
-                    formFiller[144].fid = 144;
-                    formFiller[144].fvaluefloat = 21;
-                    formFiller[244] = new FieldsValue();
-                    formFiller[244].fid = 244;
-                    formFiller[244].fvalueint = 1;
-
-                    formFiller[45] = new FieldsValue();                   //Kurier za pobraniem
-                    formFiller[45].fid = 45;
-                    formFiller[45].fvaluefloat = 30;
-                    formFiller[145] = new FieldsValue();
-                    formFiller[145].fid = 145;
-                    formFiller[145].fvaluefloat = 30;
-                    formFiller[245] = new FieldsValue();
-                    formFiller[245].fid = 245;
-                    formFiller[245].fvalueint = 1;
-                }
-            }
-
-            if (List.IsChecked == true)
-            {
-                formFiller[400] = new FieldsValue();      
-                formFiller[400].fid = 22164;
-                formFiller[400].fvaluefloat = 2;
-
-                formFiller[41] = new FieldsValue();                   //list polecony ekonomiczny
-                formFiller[41].fid = 41;
-                formFiller[41].fvaluefloat = (float)4.20;
-                formFiller[141] = new FieldsValue();
-                formFiller[141].fid = 141;
-                formFiller[141].fvaluefloat = (float)4.20;
-                formFiller[241] = new FieldsValue();
-                formFiller[241].fid = 241;
-                formFiller[241].fvalueint = 1;
-
-                formFiller[43] = new FieldsValue();                   //list polecony priorytetowy
-                formFiller[43].fid = 43;
-                formFiller[43].fvaluefloat = 7;
-                formFiller[143] = new FieldsValue();
-                formFiller[143].fid = 143;
-                formFiller[143].fvaluefloat = 7;
-                formFiller[243] = new FieldsValue();
-                formFiller[243].fid = 243;
-                formFiller[243].fvalueint = 1;
-            }
-
-            if (Kurier.IsChecked == false)
-            {
-                if (Paleta.IsChecked == true)
-                {
-                    formFiller[400] = new FieldsValue();      
-                    formFiller[400].fid = 22164;
-                    formFiller[400].fvaluefloat = 100;
-
-                    formFiller[44] = new FieldsValue();                   //Paleta opłacona z góry
-                    formFiller[44].fid = 44;
-                    formFiller[44].fvaluefloat = 160;
-                    formFiller[144] = new FieldsValue();
-                    formFiller[144].fid = 144;
-                    formFiller[144].fvaluefloat = 160;
-                    formFiller[244] = new FieldsValue();
-                    formFiller[244].fid = 244;
-                    formFiller[244].fvalueint = 1;
-
-                    formFiller[45] = new FieldsValue();                   //Paleta za pobraniem
-                    formFiller[45].fid = 45;
-                    formFiller[45].fvaluefloat = 160;
-                    formFiller[145] = new FieldsValue();
-                    formFiller[145].fid = 145;
-                    formFiller[145].fvaluefloat = 160;
-                    formFiller[245] = new FieldsValue();
-                    formFiller[245].fid = 245;
-                    formFiller[245].fvalueint = 1;
-
-                }
-            }
-
-            if (InnaDostawa.IsChecked == true)
-            {
-                formFiller[400] = new FieldsValue();      
-                formFiller[400].fid = 22164;
-                formFiller[400].fvaluefloat = 50;
-
-                formFiller[44] = new FieldsValue();                   //Kurier opłacony z góry
-                formFiller[44].fid = 44;
-                formFiller[44].fvaluefloat = float.Parse(CustomKurierZwykłyTB.Text);
-                formFiller[144] = new FieldsValue();
-                formFiller[144].fid = 144;
-                formFiller[144].fvaluefloat = float.Parse(CustomKurierZwykłyTB.Text);
-                formFiller[244] = new FieldsValue();
-                formFiller[244].fid = 244;
-                formFiller[244].fvalueint = 1;
-
-                formFiller[45] = new FieldsValue();                   //Kurier za pobraniem
-                formFiller[45].fid = 45;
-                formFiller[45].fvaluefloat = float.Parse(CustomKurierPobranieTB.Text);
-                formFiller[145] = new FieldsValue();
-                formFiller[145].fid = 145;
-                formFiller[145].fvaluefloat = float.Parse(CustomKurierPobranieTB.Text);
-                formFiller[245] = new FieldsValue();
-                formFiller[245].fid = 245;
-                formFiller[245].fvalueint = 1;
-            }
-
-            formFiller[340] = new FieldsValue();
-            formFiller[340].fid = 340;
-            formFiller[340].fvalueint = 1;
-            formFiller[341] = new FieldsValue();
-            formFiller[341].fid = 341;
-            switch (imageCounter)       
-            {
-                case 0:     
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis0phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis0photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 1:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis1phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);                        
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis1photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 2:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis2phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis2photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 3:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis3phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis3photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 4:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis4phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis4photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 5:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis5phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis5photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 6:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis6phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis6photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 7:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis7phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis7photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-            }
-            isThereATable = false;
-            if (Encoding.Default.GetByteCount(descriptionWorker) > 1569)
-            {
-                if (toMuchWeightNoticed == false)
-                {
-                    MessageBoxResult wrongResult = MessageBox.Show("Twój tekst jest za długi! Musisz go skrócić.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    toMuchWeight = true;
-                    toMuchWeightNoticed = true;
-                }
-            }
-            if (toMuchWeight == false)
-            {
-                service.doNewAuctionExt(sessionHandler, formFiller, 1, 1, itemStruct, variants, auctionTags, afterSale,
-                addicionalServicesGroup, out itemCost, out itemPromStatus);
-            }
-            Thread.Sleep(200);
-        }
-
-        public double ConvertToTimestamp(DateTime value)
-        {            
-            TimeSpan span = (value - new DateTime(1970, 1, 1, 0, 0, 0, 0).ToLocalTime());            
-            return (float)span.TotalSeconds;
-        }
-
-        public void MakeAuction2(DateTime currentDateWorker, int categorySwitch)
-        {
-            formFiller[0] = new FieldsValue();
-            formFiller[0].fid = 0;
-
-            formFiller[401] = new FieldsValue();       //Stan
-            formFiller[401].fid = 20365;
-            
-                formFiller[401].fvalueint = 1;
-            
-
-            formFiller[402] = new FieldsValue();       //Stan
-            formFiller[402].fid = 32611;
-            
-                formFiller[402].fvalueint = 1;
-          
-
-            
-
-            afterSale = new AfterSalesServiceConditionsStruct();
-            afterSale.warranty = "de4e9e97-f3fa-445e-ba87-a9d70f3e670e";
-            afterSale.returnpolicy = "e711157a-609b-4845-a916-37eae22a94e5";
-            afterSale.impliedwarranty = "8e2c1aca-5237-4b36-9853-1783a8d4bd97";
-
-            //Określanie częstotliwości wystawiania
-            formFiller[1] = new FieldsValue();
-            formFiller[1].fid = 1;
-            formFiller[1].fvaluestring = NameOfProdTB.Text;
-
-            formFiller[2] = new FieldsValue();
-            formFiller[2].fid = 2;
-            formFiller[2].fvalueint = categorySwitch;               
-
-            formFiller[3] = new FieldsValue();
-            formFiller[3].fid = 3;
-            formFiller[3].fvaluedatetime = (long)ConvertToTimestamp(currentDateWorker);
-            formFiller[4] = new FieldsValue();
-            formFiller[4].fid = 4;
-            formFiller[4].fvalueint = 99;
-            formFiller[5] = new FieldsValue();
-            formFiller[5].fid = 5;
-            if (AmountTB.Text != "")
-            {
-                if(AmountTB.Text != "0")
-                {
-                    formFiller[5].fvalueint = Int32.Parse(AmountTB.Text);       
-                }
-                else
-                {
-                        formFiller[5].fvalueint = 1;
-                }
-            }            
-            else
-            {
-                formFiller[5].fvalueint = 1;
-            }
-            formFiller[8] = new FieldsValue();
-            formFiller[8].fid = 8;
-            formFiller[8].fvaluefloat = float.Parse(PriceTB.Text);
-            formFiller[9] = new FieldsValue();
-            formFiller[9].fid = 9;
-            formFiller[9].fvalueint = 1;
-            formFiller[10] = new FieldsValue();
-            formFiller[10].fid = 10;
-            formFiller[10].fvalueint = 15;
-            formFiller[11] = new FieldsValue();
-            formFiller[11].fid = 11;
-            formFiller[11].fvaluestring = "Poznań";
-            formFiller[12] = new FieldsValue();
-            formFiller[12].fid = 12;
-            formFiller[12].fvalueint = 1;
-            formFiller[14] = new FieldsValue();
-            formFiller[14].fid = 14;
-            formFiller[14].fvalueint = 32;
-
-
-            string path = AppDomain.CurrentDomain.BaseDirectory;    //Dopisz kod zamieniający istniejący plik na nowy i zrób funkcję zapisującą w oddzielnym pliku
-            path = path.Replace(@"\", "/");
-            string normalPath = path;
-            path = path + "/Auctions/" + currentOrginalName + "/Photos/" + currentOrginalName;
-
-            BitmapImage photoBitmapBeggining = new BitmapImage(new Uri(normalPath + "head.png"));     //W .Net robi się to inaczej           
-            byte[] photoBeggining = getJPGFromImageControl(photoBitmapBeggining);
-            formFiller[342] = new FieldsValue();
-            formFiller[342].fid = 342;
-            formFiller[342].fvalueimage = photoBeggining;
-
-            if (imageCounter > 7)
-            {
-                imageCounter = 7;
-            }
-            imageSelector = 0;
-            for (UInt32 i = 16; i < 16 + imageCounter; i++)
-            {
-                BitmapImage photoBitmap = new BitmapImage(new Uri(path + imageSelector + ".jpg"));     //Zrób sprawdzanie dla różnych typów obrazów jpg png gif może przez exists
-                byte[] photo = getJPGFromImageControl(photoBitmap);
-                formFiller[i] = new FieldsValue();
-                formFiller[i].fid = (int)i;
-                formFiller[i].fvalueimage = photo;
-                imageSelector++;
-            }
-            if (File.Exists(normalPath + "Table/" + SKUTB.Text + ".png"))
-            {
-                BitmapImage photoBitmapTable = new BitmapImage(new Uri(normalPath + "Table/" + SKUTB.Text + ".png"));    
-                byte[] photoTable = getJPGFromImageControl(photoBitmapTable);
-                formFiller[343] = new FieldsValue();
-                formFiller[343].fid = 343;
-                formFiller[343].fvalueimage = photoTable;
-                isThereATable = true;
-            }
-
-            formFiller[27] = new FieldsValue();
-            formFiller[27].fid = 27;
-            formFiller[27].fvaluestring = "Numer konta bankowego: 97 1140 2004 0000 3102 7532 3271";
-            formFiller[28] = new FieldsValue();
-            formFiller[28].fid = 28;
-            formFiller[28].fvalueint = 0;
-            formFiller[29] = new FieldsValue();
-            formFiller[29].fid = 29;
-            formFiller[29].fvalueint = 1;
-            formFiller[30] = new FieldsValue();
-            formFiller[30].fid = 30;
-            formFiller[30].fvalueint = 1;
-            formFiller[32] = new FieldsValue();
-            formFiller[32].fid = 32;
-            formFiller[32].fvaluestring = "60-715";
-            formFiller[33] = new FieldsValue();
-            formFiller[33].fid = 33;
-            formFiller[33].fvaluestring = "97 1140 2004 0000 3102 7532 3271";
-            formFiller[34] = new FieldsValue();
-            formFiller[34].fid = 34;
-            formFiller[34].fvaluestring = "97 1140 2004 0000 3102 7532 3271";
-            formFiller[35] = new FieldsValue();
-            formFiller[35].fid = 35;
-            formFiller[35].fvalueint = 1;
-
-            if (TylkoOsobisty.IsChecked == true)
-            {
-                Paleta.IsChecked = false;
-                Kurier.IsChecked = false;
-                List.IsChecked = false;
-                InnaDostawa.IsChecked = false;
-            }
-
-            if (Paleta.IsChecked == false)
-            {
-                if (Kurier.IsChecked == true)
-                {
-                    formFiller[400] = new FieldsValue();      
-                    formFiller[400].fid = 22164;
-                    formFiller[400].fvaluefloat = 20;
-
-                    formFiller[44] = new FieldsValue();                   //Kurier opłacony z góry
-                    formFiller[44].fid = 44;
-                    formFiller[44].fvaluefloat = 21;
-                    formFiller[144] = new FieldsValue();
-                    formFiller[144].fid = 144;
-                    formFiller[144].fvaluefloat = 21;
-                    formFiller[244] = new FieldsValue();
-                    formFiller[244].fid = 244;
-                    formFiller[244].fvalueint = 1;
-
-                    formFiller[45] = new FieldsValue();                   //Kurier za pobraniem
-                    formFiller[45].fid = 45;
-                    formFiller[45].fvaluefloat = 30;
-                    formFiller[145] = new FieldsValue();
-                    formFiller[145].fid = 145;
-                    formFiller[145].fvaluefloat = 30;
-                    formFiller[245] = new FieldsValue();
-                    formFiller[245].fid = 245;
-                    formFiller[245].fvalueint = 1;
-                }
-            }
-
-            if (List.IsChecked == true)
-            {
-                formFiller[400] = new FieldsValue();      
-                formFiller[400].fid = 22164;
-                formFiller[400].fvaluefloat = 2;
-
-                formFiller[41] = new FieldsValue();                   //list polecony ekonomiczny
-                formFiller[41].fid = 41;
-                formFiller[41].fvaluefloat = (float)4.20;
-                formFiller[141] = new FieldsValue();
-                formFiller[141].fid = 141;
-                formFiller[141].fvaluefloat = (float)4.20;
-                formFiller[241] = new FieldsValue();
-                formFiller[241].fid = 241;
-                formFiller[241].fvalueint = 1;
-
-                formFiller[43] = new FieldsValue();                   //list polecony priorytetowy
-                formFiller[43].fid = 43;
-                formFiller[43].fvaluefloat = 7;
-                formFiller[143] = new FieldsValue();
-                formFiller[143].fid = 143;
-                formFiller[143].fvaluefloat = 7;
-                formFiller[243] = new FieldsValue();
-                formFiller[243].fid = 243;
-                formFiller[243].fvalueint = 1;
-            }
-
-            if (Kurier.IsChecked == false)
-            {
-                if (Paleta.IsChecked == true)
-                {
-                    formFiller[400] = new FieldsValue();      
-                    formFiller[400].fid = 22164;
-                    formFiller[400].fvaluefloat = 100;
-
-                    formFiller[44] = new FieldsValue();                   //Paleta opłacona z góry
-                    formFiller[44].fid = 44;
-                    formFiller[44].fvaluefloat = 160;
-                    formFiller[144] = new FieldsValue();
-                    formFiller[144].fid = 144;
-                    formFiller[144].fvaluefloat = 160;
-                    formFiller[244] = new FieldsValue();
-                    formFiller[244].fid = 244;
-                    formFiller[244].fvalueint = 1;
-
-                    formFiller[45] = new FieldsValue();                   //Paleta za pobraniem
-                    formFiller[45].fid = 45;
-                    formFiller[45].fvaluefloat = 160;
-                    formFiller[145] = new FieldsValue();
-                    formFiller[145].fid = 145;
-                    formFiller[145].fvaluefloat = 160;
-                    formFiller[245] = new FieldsValue();
-                    formFiller[245].fid = 245;
-                    formFiller[245].fvalueint = 1;
-
-                }
-            }
-
-            if (InnaDostawa.IsChecked == true)
-            {
-                formFiller[400] = new FieldsValue();      
-                formFiller[400].fid = 22164;
-                formFiller[400].fvaluefloat = 50;
-
-                formFiller[44] = new FieldsValue();                   //Kurier opłacony z góry
-                formFiller[44].fid = 44;
-                formFiller[44].fvaluefloat = float.Parse(CustomKurierZwykłyTB.Text);
-                formFiller[144] = new FieldsValue();
-                formFiller[144].fid = 144;
-                formFiller[144].fvaluefloat = float.Parse(CustomKurierZwykłyTB.Text);
-                formFiller[244] = new FieldsValue();
-                formFiller[244].fid = 244;
-                formFiller[244].fvalueint = 1;
-
-                formFiller[45] = new FieldsValue();                   //Kurier za pobraniem
-                formFiller[45].fid = 45;
-                formFiller[45].fvaluefloat = float.Parse(CustomKurierPobranieTB.Text);
-                formFiller[145] = new FieldsValue();
-                formFiller[145].fid = 145;
-                formFiller[145].fvaluefloat = float.Parse(CustomKurierPobranieTB.Text);
-                formFiller[245] = new FieldsValue();
-                formFiller[245].fid = 245;
-                formFiller[245].fvalueint = 1;
-            }
-
-            formFiller[340] = new FieldsValue();
-            formFiller[340].fid = 340;
-            formFiller[340].fvalueint = 1;
-            formFiller[341] = new FieldsValue();
-            formFiller[341].fid = 341;
-            switch (imageCounter)       
-            {
-                case 0:     
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis0phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis0photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 1:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis1phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);                        
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis1photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 2:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis2phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis2photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 3:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis3phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis3photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);                        
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 4:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis4phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis4photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 5:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis5phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis5photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 6:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis6phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis6photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-                case 7:
-                    if (isThereATable == true)
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis7phototable.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    else
-                    {
-                        StreamReader desc = new StreamReader(normalPath + "Desc/opis7photo.json");
-                        descriptionWorker = desc.ReadToEnd();
-                        descriptionWorker = descriptionWorker.Replace("AUTYT", NameOfProdTB.Text);
-                        descriptionWorker = descriptionWorker.Replace("OFFDESC", DescriptionTB.Text);
-                        formFiller[341].fvaluestring = descriptionWorker;
-                        desc.Close();
-                    }
-                    break;
-            }
-            isThereATable = false;
-            if(Encoding.Default.GetByteCount(descriptionWorker)>1569)
-            {
-                if (toMuchWeightNoticed == false)
-                {
-                    MessageBoxResult wrongResult = MessageBox.Show("Twój tekst jest za długi! Musisz go skrócić.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    toMuchWeight = true;
-                    toMuchWeightNoticed = true;
-                    /*
-                    MessageBoxResult wrongResult = MessageBox.Show("Twój tekst jest za długi! Skrócuć go automatycznie?", "Error", MessageBoxButton.OKCancel, MessageBoxImage.Error);
-
-                    int dotSearcher = DescriptionTB.Text.Length - 1;
-                    DescriptionTB.Text = DescriptionTB.Text.Remove(dotSearcher - 3, DescriptionTB.Text.Length - dotSearcher-3);
-                    while (DescriptionTB.Text[dotSearcher].ToString() != ".")
-                    {
-                        dotSearcher--;
-                    }
-                    DescriptionTB.Text = DescriptionTB.Text.Remove(dotSearcher, DescriptionTB.Text.Length - dotSearcher);
-                    goto autoDescriptionChange;
-                    */
-                }
-            }
-            if (toMuchWeight == false)
-            {
-                service.doNewAuctionExt(sessionHandler, formFiller, 1, 1, itemStruct, variants, auctionTags, afterSale,
-                    addicionalServicesGroup, out itemCost, out itemPromStatus);
-            }
-            Thread.Sleep(200);
-
-        }
+        
 
         public void CustomDates()
         {
@@ -1569,7 +382,7 @@ namespace AllFiller
                                 numberOfDataWorkers++;
                                 dateWorker[i] = new DateTime();
                                 dateWorker[i] = OfferCallendar.SelectedDates[i].Date;
-                                Shower.Items.Add(dateWorker[i].ToString());
+                                
                             }
                         }
                     }
@@ -1599,14 +412,7 @@ namespace AllFiller
         }
 
         
-        public byte[] getJPGFromImageControl(BitmapImage imageC)
-        {
-            MemoryStream memStream = new MemoryStream();
-            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(imageC));
-            encoder.Save(memStream);
-            return memStream.ToArray();
-        }
+        
 
         private void NameOfProdTB_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -2056,10 +862,7 @@ namespace AllFiller
                     categoriesList.Add(121435);
                 }
             }
-            foreach (int c in categoriesList)
-            {
-                Shower.Items.Add(c);
-            }
+            
 
 
 
@@ -2117,8 +920,7 @@ namespace AllFiller
             NameOfProdTB.Visibility = Visibility.Visible;
             OpisLB.Visibility = Visibility.Visible;
             AucDownBT.Visibility = Visibility.Hidden;
-            CenaLB.Visibility = Visibility.Visible;
-            Shower.Visibility = Visibility.Visible;
+            CenaLB.Visibility = Visibility.Visible;            
             StartAuction.Visibility = Visibility.Visible;
             Continue.Visibility = Visibility.Visible;
             AmountTB.Visibility = Visibility.Visible;
@@ -2129,7 +931,7 @@ namespace AllFiller
             SKULB.Visibility = Visibility.Visible;
             Kurier.Visibility = Visibility.Visible;
             Paleta.Visibility = Visibility.Visible;
-            List.Visibility = Visibility.Visible;
+            ListP.Visibility = Visibility.Visible;
             TylkoOsobisty.Visibility = Visibility.Visible;
             InnaDostawa.Visibility = Visibility.Visible;
             OpcjeDostawyLB.Visibility = Visibility.Visible;
@@ -2144,8 +946,7 @@ namespace AllFiller
             ZLKurier2LB.Visibility = Visibility.Visible;
             OplaconyLB.Visibility = Visibility.Visible;
             PobranieLB.Visibility = Visibility.Visible;
-            ClearAllBut.Visibility = Visibility.Visible;
-            InMagazineBut.Visibility = Visibility.Hidden;
+            ClearAllBut.Visibility = Visibility.Visible;   
             CategoriesPopup.Visibility = Visibility.Visible;
             DownloadedAuctionData.Visibility = Visibility.Hidden;
             ActTabBut.Visibility = Visibility.Hidden;
@@ -2161,7 +962,6 @@ namespace AllFiller
             OpisLB.Visibility = Visibility.Hidden;
             AucDownBT.Visibility = Visibility.Visible;
             CenaLB.Visibility = Visibility.Hidden;
-            Shower.Visibility = Visibility.Hidden;
             StartAuction.Visibility = Visibility.Hidden;
             Continue.Visibility = Visibility.Hidden;
             AmountTB.Visibility = Visibility.Hidden;
@@ -2172,7 +972,7 @@ namespace AllFiller
             SKULB.Visibility = Visibility.Hidden;
             Kurier.Visibility = Visibility.Hidden;
             Paleta.Visibility = Visibility.Hidden;
-            List.Visibility = Visibility.Hidden;
+            ListP.Visibility = Visibility.Hidden;
             TylkoOsobisty.Visibility = Visibility.Hidden;
             InnaDostawa.Visibility = Visibility.Hidden;
             OpcjeDostawyLB.Visibility = Visibility.Hidden;
@@ -2188,7 +988,6 @@ namespace AllFiller
             OplaconyLB.Visibility = Visibility.Hidden;
             PobranieLB.Visibility = Visibility.Hidden;
             ClearAllBut.Visibility = Visibility.Hidden;
-            InMagazineBut.Visibility = Visibility.Visible;
             CategoriesPopup.Visibility = Visibility.Hidden;
             DownloadedAuctionData.Visibility = Visibility.Visible;
             ActTabBut.Visibility = Visibility.Visible; 
@@ -2197,22 +996,8 @@ namespace AllFiller
 
         private void ActTabBut_Click(object sender, RoutedEventArgs e)
         {
-            //Ceny można zmieniać tylko przy aukcjach, na których nikt jeszcze nic nie kupił - takie są zasady allegro dla WebApi
-            try           //Na REST Api można zmieniać zawsze
-            {             //Generalnie wywala błędy, ale działa O.o
-                int itemsSold = 0;
-                int itemsNow = 0;
-                long itemId = 7302711402;
-                string changePriceInfo = service.doChangePriceItem(sessionHandler, ref itemId, 0, 0, 1000, 0);
-                Shower.Items.Add(changePriceInfo);
-                service.doChangeQuantityItem(sessionHandler, ref itemId, 10, out itemsNow, out itemsSold);
-                Shower.Items.Add("Pozostało: " + itemsNow);
-                Shower.Items.Add("Sprzedano: " + itemsSold);
-            }
-            catch
-            {
-                MessageBoxResult wrongResult = MessageBox.Show("Ta aukcja jest właśnie modyfikowana. Spróbuj później.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            UpToDateAuctions upup = new UpToDateAuctions();
+            upup.GoOn(sessionHandler, service);
         }
     }
 }
